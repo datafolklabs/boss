@@ -1,0 +1,21 @@
+
+NAME: Boss
+
+AUTHOR: BJ Dierkes <derks@bjdierkes.com>
+
+DESCRIPTION:
+
+Boss is a development utility that provides quick access to reusable project
+templates for any language.  
+
+MORE INFORMATION:
+
+All documentation is available from the official website:
+
+    http://boss.rtfd.org
+    
+    
+LICENSE:
+
+The Boss project is Open Source and is distributed under the BSD License 
+(three clause).  Please see the LICENSE file included with this software.  
