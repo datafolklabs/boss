@@ -3,16 +3,23 @@ import os
 from cement2.core import foundation, backend
 from boss.cli.controllers.base import BossBaseController
 from boss.core.utils import abspath
+from boss.core import exc as boss_exc
 
 defaults = backend.defaults('boss')
 defaults['boss']['data_dir'] = '~/.boss/'
 defaults['boss']['auto_update'] = True
+defaults['boss']['project_dir'] = '~/devel/'
 
 class BossApp(foundation.CementApp):
     class Meta:
         label = 'boss'
         base_controller = BossBaseController
         config_defaults = defaults
+        config_files = [
+            '/etc/boss/boss.conf',
+            '~/.boss.conf',
+            '~/.boss/config',
+            ]
         default_sources = dict(boss='git@github.com:derks/boss-templates.git')
         
     def validate_config(self):
@@ -21,15 +28,15 @@ class BossApp(foundation.CementApp):
                         abspath(self.config.get('boss', 'data_dir')))
         
         # fix up sources list
-        res = self.config.get('boss', 'sources')
-        final_sources = []
-        if type(res) == str:
-            sources = res.split(' ')
-            for source in sources:
-                final = source.strip('\\ \n')
-                if len(final) > 0:
-                    final_sources.append(final)
-            self.config.set('boss', 'sources', final_sources)
+        #res = self.config.get('boss', 'sources')
+        #final_sources = []
+        #if type(res) == str:
+        #    sources = res.split(' ')
+        #    for source in sources:
+        #        final = source.strip('\\ \n')
+        #        if len(final) > 0:
+        #            final_sources.append(final)
+        #    self.config.set('boss', 'sources', final_sources)
             
         # create data directory
         if not os.path.exists(self.config.get('boss', 'data_dir')):
@@ -48,6 +55,8 @@ def main(*args, **kw):
         app.setup()
         from boss.cli.bootstrap import base
         app.run()
+    except boss_exc.BossArgumentError as e:
+        print "BossArgumentError: %s" % e.msg
     finally:
         app.close()
 
