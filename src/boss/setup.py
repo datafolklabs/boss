@@ -2,29 +2,43 @@
 from setuptools import setup, find_packages
 import sys, os
 
-setup(name='@module_name@',
-    version=@version@,
-    description="@description@",
-    long_description="@description@",
+VERSION = '0.9.1'
+
+LONG = """
+Boss is a development utility that provides quick access to reusable project
+templates for any language.  
+"""
+
+setup(name='boss',
+    version=VERSION,
+    description="Baseline Open Source Software Templates",
+    long_description=LONG,
     classifiers=[], 
     keywords='',
-    author='@project_creator@',
-    author_email='@project_creator_email@',
-    url='@url@',
-    license='@license@',
+    author='BJ Dierkes',
+    author_email='derks@bjdierkes.com',
+    url='http://boss.rtfd.org',
+    license='BSD',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     include_package_data=True,
     zip_safe=False,
     test_suite='nose.collector',
     install_requires=[
         ### Required to build documentation
-        # "Sphinx >= 1.0",
+        # 'sphinx',
+        #
         ### Required for testing
-        # "nose",
-        # "coverage",
+        # 'nose',
+        # 'coverage',
+        #
+        ### Required to function
+        'cement2',
+        'jsonpickle',
         ],
     setup_requires=[],
     entry_points="""
+    [console_scripts]
+    boss = boss.cli.main:main
     """,
     namespace_packages=[],
     )

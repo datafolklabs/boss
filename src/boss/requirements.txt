@@ -1,0 +1,2 @@
+cement2>=1.9.7
+jsonpickle
