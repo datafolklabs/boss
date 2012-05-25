@@ -8,8 +8,6 @@ from boss.core import exc as boss_exc
 
 defaults = backend.defaults('boss', 'answers')
 defaults['boss']['data_dir'] = '~/.boss/'
-defaults['boss']['auto_update'] = True
-defaults['boss']['project_dir'] = '~/devel/'
 
 class BossApp(foundation.CementApp):
     class Meta:

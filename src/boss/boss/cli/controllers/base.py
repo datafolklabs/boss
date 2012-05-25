@@ -158,9 +158,8 @@ class BossBaseController(BossAbstractBaseController):
             (['-t', '--template'], 
              dict(help="a template label", dest='template')),
             (['--local'], 
-             dict(help='local source repository', 
+             dict(help='toggle a local source repository', 
                   action='store_true', default=False)),
-            (['--remote'], dict(help='remote source repository')),
             (['modifier1'], dict(help='command modifier', nargs='?')),
             (['modifier2'], dict(help='command modifier', nargs='?')),
             ]
@@ -174,7 +173,7 @@ class BossBaseController(BossAbstractBaseController):
     @expose(help="create project files from a template")
     def create(self):
         if not self.app.pargs.modifier1:
-            raise boss_exc.BossArgumentError("Project name required.")
+            raise boss_exc.BossArgumentError("Destination path required.")
             
         if not self.app.pargs.template:
             raise boss_exc.BossArgumentError("Template label required.")
@@ -190,9 +189,7 @@ class BossBaseController(BossAbstractBaseController):
             template = self.app.pargs.template
         
         src = SourceManager(self.app)        
-        dest = os.path.join(self.app.config.get('boss', 'project_dir'),
-                            self.app.pargs.modifier1)
-        src.create_from_template(source, template, dest)
+        src.create_from_template(source, template, self.app.pargs.modifier1)
 
     @expose(help="list all available templates")
     def templates(self):
