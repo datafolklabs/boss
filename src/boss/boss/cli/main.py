@@ -1,11 +1,12 @@
 
 import os
 from cement2.core import foundation, backend
+from cement2.core import exc as cement_exc
 from boss.cli.controllers.base import BossBaseController
 from boss.core.utils import abspath
 from boss.core import exc as boss_exc
 
-defaults = backend.defaults('boss')
+defaults = backend.defaults('boss', 'answers')
 defaults['boss']['data_dir'] = '~/.boss/'
 defaults['boss']['auto_update'] = True
 defaults['boss']['project_dir'] = '~/devel/'
@@ -48,6 +49,9 @@ def main(*args, **kw):
         app.run()
     except boss_exc.BossArgumentError as e:
         print "BossArgumentError: %s" % e.msg
+    except cement_exc.CementSignalError as e:
+        print
+        print e
     finally:
         app.close()
 
