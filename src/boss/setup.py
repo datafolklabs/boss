@@ -33,7 +33,6 @@ setup(name='boss',
         #
         ### Required to function
         'cement2',
-        'jsonpickle',
         ],
     setup_requires=[],
     entry_points="""

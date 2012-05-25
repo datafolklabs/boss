@@ -2,54 +2,58 @@
 import os
 import sys
 import shutil
+import shelve
+from tempfile import mkdtemp
+from datetime import datetime
 from cement2.core.controller import CementBaseController, expose
 from boss.core.utils import abspath, exec_cmd2
-from boss.core.db import JsonDB
+#from boss.core.db import JsonDB
 from boss.core import exc as boss_exc
     
 class BossAbstractBaseController(CementBaseController):
     def _setup(self, *args, **kw):
         super(BossAbstractBaseController, self)._setup(*args, **kw)
-        self.db = JsonDB(self.app.config.get('boss', 'db_path'))
-        self.db.connect()
         
-class Source(object):
-    def __init__(self, label, remote_path, local_path):
-        self.label = label
-        self.local_path = local_path
-        self.remote_path = remote_path
+class SourceManager(object):
+    def __init__(self, db):
+        self.db = db
         
-        # hard hack
-        if self.label == 'local':
-            self.remote_path = None
-        
-    def sync(self):
-        if self.remote_path:
-            if not os.path.exists(self.local_path):
-                exec_cmd2(['git', 'clone', self.remote_path, self.local_path])
+    def sync(self, source):
+        sources = self.db['sources']
+        src = self.db['sources'][source]
+        if not src['is_local']:
+            if not os.path.exists(src['cache']):
+                exec_cmd2([ 'git', 'clone', 
+                            src['path'], src['cache'] ])
             else:
-                os.chdir(self.local_path)
+                os.chdir(src['cache'])
                 exec_cmd2(['git', 'pull'])
+        src['last_sync_time'] = datetime.now()
+        sources[source] = src
+        self.db['sources'] = sources
     
-    def get_templates(self):
+    def get_templates(self, source):
         templates = []
-        for entry in os.listdir(self.local_path):
-            full_path = os.path.join(self.local_path, entry)
+        src = self.db['sources'][source]
+        for entry in os.listdir(src['cache']):
+            full_path = os.path.join(src['cache'], entry)
             if entry.startswith('.'):
                 continue
             elif os.path.isdir(full_path):
                 templates.append(entry)
         return templates
     
-    def get_template_config(self, template):
-        full_path = os.path.join(self.local_path, template)
+    def get_template_config(self, source, template):
+        src = self.db['sources'][source]
+        full_path = os.path.join(src['local_path'], template)
         sys.path.insert(0, full_path)
         my_mod = __import__('boss_config', globals(), locals(), [], -1)
         sys.path.pop(0)
         return my_mod
         
-    def create_from_template(self, template, dest_path):
-        mod = self.get_template_config(template)
+    def create_from_template(self, source, template, dest_path):
+        src = self.db['sources'][source]
+        mod = self.get_template_config(source, template)
         _vars = dict()
         for question,_var in mod.VARIABLES:
             res = raw_input("%s: " % question)
@@ -63,6 +67,10 @@ class BossBaseController(BossAbstractBaseController):
         arguments = [
             (['-t', '--template'], 
              dict(help="a template label", dest='template')),
+            (['--local'], 
+             dict(help='local source repository', 
+                  action='store_true', default=False)),
+            (['--remote'], dict(help='remote source repository')),
             (['modifier1'], dict(help='command modifier', nargs='?')),
             (['modifier2'], dict(help='command modifier', nargs='?')),
             ]
@@ -81,7 +89,7 @@ class BossBaseController(BossAbstractBaseController):
         if not self.app.pargs.template:
             raise boss_exc.BossArgumentError("Template label required.")
         
-        sources = self.db.get('sources', self.app._meta.default_sources)    
+        sources = self.app.db.get('sources', self.app._meta.default_sources)    
         
         try:
             tmpl_parts = self.app.pargs.template.split(':')
@@ -105,7 +113,7 @@ class BossBaseController(BossAbstractBaseController):
     @expose(help="list all available templates", aliases=['list-templates'])
     def list(self):
         print
-        sources = self.db.get('sources', self.app._meta.default_sources)
+        sources = self.app.db['sources']
         for label in sources:
             print "%s Templates (%s)" % (label.capitalize(), sources[label])
             print '-' * 78
@@ -118,67 +126,70 @@ class BossBaseController(BossAbstractBaseController):
                             )
                 remote_path = sources[label]
                         
-            src = Source(label, remote_path, local_path)
-            for tmpl in src.get_templates():
+            src = SourceManager(self.app.db)
+            for tmpl in src.get_templates(label):
                 print tmpl
                 
             print
 
     @expose(help="sync a source repository")
     def sync(self):
-        sources = self.db.get('sources', self.app._meta.default_sources)
-            
-        for label in sources:
+        _sources = self.app.db['sources']
+        for label in self.app.db['sources']:
             print "Syncing %s Templates . . . " % label.capitalize()
-            local_path = "%s/templates/%s" % (
-                    self.app.config.get('boss', 'data_dir'), label,
-                    )
-            src = Source(label, sources[label], local_path)
-            src.sync()
+            src = SourceManager(self.app.db)
+            src.sync(label)
             print
             
     @expose(help="list template source repositories")
     def list_sources(self):
-        sources = self.db.get('sources', self.app._meta.default_sources)
-        for key in sources:
-            print "%s: %s" % (key, sources[key])
-                                 
+        for key in self.app.db['sources']:
+            src = self.app.db['sources'][key]
+            print
+            print "--        Label: %s" % key
+            print "    Source Path: %s" % src['path']
+            print "          Cache: %s" % src['cache']
+            print "     Local Only: %s" % src['is_local']
+            print " Last Sync Time: %s" % src['last_sync_time']
+        print
+            
     @expose(help="add a template source repository")
     def add_source(self):
         if not self.app.pargs.modifier1 or not self.app.pargs.modifier2:
             raise boss_exc.BossArgumentError("Repository name and path required.")
             
-        sources = self.db.get('sources', self.app._meta.default_sources)
-        if self.app.pargs.modifier1 == 'local':
-            path = abspath(self.app.pargs.modifier2)
-        else:
-            path = self.app.pargs.modifier2
+        sources = self.app.db['sources']
+        label = self.app.pargs.modifier1
+        path = self.app.pargs.modifier2
+        cache_dir = mkdtemp(dir=self.app.config.get('boss', 'cache_dir'))
+
+        if self.app.pargs.local:
+            path = abspath(path)
             
-        sources[self.app.pargs.modifier1] = path
-        self.db.set('sources', sources)
+        sources[label] = dict(
+            label=label,
+            path=path,
+            cache=cache_dir,
+            is_local=self.app.pargs.local,
+            last_sync_time='never'
+            )        
+        self.app.db['sources'] = sources
 
     @expose(help="remove a source repository")
     def rm_source(self):
-        sources = self.db.get('sources', self.app._meta.default_sources)
+        sources = self.app.db['sources']
         
         if not self.app.pargs.modifier1:
             raise boss_exc.BossArgumentError("Repository name required.")
         elif self.app.pargs.modifier1 not in sources:
             raise boss_exc.BossArgumentError("Unknown source repository.")
-
         
+        cache = sources[self.app.pargs.modifier1]['cache']
+        if os.path.exists(cache):
+            shutil.rmtree(cache)
+            
         del sources[self.app.pargs.modifier1]
-        
-        # don't delete a local template dir, only remotes
-        if self.app.pargs.modifier1 != 'local':
-            pth = "%s/templates/%s" % (
-                self.app.config.get('boss', 'data_dir'),
-                self.app.pargs.modifier1,
-                )
-            if os.path.exists(pth):
-                shutil.rmtree(pth)
-                
-        self.db.set('sources', sources)
+        self.app.db['sources'] = sources
     
             
     

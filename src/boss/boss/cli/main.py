@@ -26,25 +26,16 @@ class BossApp(foundation.CementApp):
         # fix up paths
         self.config.set('boss', 'data_dir', 
                         abspath(self.config.get('boss', 'data_dir')))
-        
-        # fix up sources list
-        #res = self.config.get('boss', 'sources')
-        #final_sources = []
-        #if type(res) == str:
-        #    sources = res.split(' ')
-        #    for source in sources:
-        #        final = source.strip('\\ \n')
-        #        if len(final) > 0:
-        #            final_sources.append(final)
-        #    self.config.set('boss', 'sources', final_sources)
-            
-        # create data directory
+
+        # create directories
         if not os.path.exists(self.config.get('boss', 'data_dir')):
             os.makedirs(self.config.get('boss', 'data_dir'))
-
+    
         # add shortcuts
-        pth = os.path.join(self.config.get('boss', 'data_dir'), 'templates')
-        self.config.set('boss', 'template_dir', pth)
+        pth = os.path.join(self.config.get('boss', 'data_dir'), 'cache')
+        if not os.path.exists(abspath(pth)):
+            os.makedirs(abspath(pth))
+        self.config.set('boss', 'cache_dir', pth)
     
         pth = os.path.join(self.config.get('boss', 'data_dir'), 'boss.db')
         self.config.set('boss', 'db_path', pth)
@@ -52,8 +43,8 @@ class BossApp(foundation.CementApp):
 def main(*args, **kw):
     app = BossApp(*args, **kw)
     try:
-        app.setup()
         from boss.cli.bootstrap import base
+        app.setup()
         app.run()
     except boss_exc.BossArgumentError as e:
         print "BossArgumentError: %s" % e.msg
