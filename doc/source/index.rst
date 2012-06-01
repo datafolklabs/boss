@@ -12,6 +12,9 @@ templating, but far easier to extend.  Though Boss is written in Python, it is
 not limited to any particular language. Boss is very beta... any feedback is 
 welcome and appreciated.
 
+.. image:: https://secure.travis-ci.org/derks/boss.png
+  :target: http://travis-ci.org/#!/derks/boss
+  
 Features:
 
  * Supports multiple local, and remote (git) template sources
@@ -20,7 +23,7 @@ Features:
  
 Other sites that might be helpful.
 
- * RTFD: http://cement.rtfd.org/en/latest/
+ * RTFD: http://index.rtfd.org/en/latest/
  * CODE: https://github.com/derks/boss/
  * PYPI: http://pypi.python.org/pypi/boss
  *   CI: http://travis-ci.org/#!/derks/boss
