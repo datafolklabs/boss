@@ -25,7 +25,6 @@ Other sites that might be helpful.
 
  * RTFD: http://boss.rtfd.org/en/latest/
  * CODE: https://github.com/derks/boss/
- * PYPI: http://pypi.python.org/pypi/boss
  *   CI: http://travis-ci.org/#!/derks/boss
 
 Official templates are available from:
