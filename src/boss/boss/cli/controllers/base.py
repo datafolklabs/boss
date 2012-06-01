@@ -16,7 +16,7 @@ from boss.core import exc as boss_exc
 class BossAbstractBaseController(CementBaseController):
     def _setup(self, *args, **kw):
         super(BossAbstractBaseController, self)._setup(*args, **kw)
-        
+            
 class SourceManager(object):
     def __init__(self, app):
         self.app = app
@@ -69,13 +69,46 @@ class SourceManager(object):
         f.close()
         return config
         
+    def _sub(self, txt, variables):
+        new_txt = txt
+        word_map = dict()
+        
+        # do per item substitution rather than entire txt to avoid variable
+        # confusion.  Also allows us to call .capitalize, .lower, etc on the
+        # string after substitution.
+        for item in str(txt).split(' '):
+            # Not a template var? (generic patern)
+            pattern = "(.*)\@(.*)\@(.*)"
+            if not re.match(pattern, item):
+                continue
+                
+            for key,value in sorted(variables.items()):
+                if key in word_map:
+                    continue
+                    
+                pattern = "(.*)\@(%s)([\._a-z0-9]*)\@(.*)" % key
+                m = re.match(pattern, item)
+                if m:
+                    if len(m.group(3)) > 0:
+                        fixed = str(getattr(value, m.group(3).lstrip('.'))())
+                    else:
+                        fixed = str(value)
+
+                    word_map["@%s%s@" % (m.group(2), m.group(3))] = fixed
+        
+        # actually replace the text
+        for pattern,replacement in sorted(word_map.items()):
+            new_txt = re.sub(pattern, replacement, new_txt)
+            
+        return new_txt
+        
     def _fix_file(self, file_name, file_data, variables):
         for var in variables:
             # modify file name
-            file_name = re.sub(var, variables[var], file_name)
+            file_name = self._sub(file_name, variables)
             
             # modify file content
-            file_data = re.sub(var, variables[var], file_data)
+            file_data = self._sub(file_data, variables)
             
         return (file_name, file_data)
         
