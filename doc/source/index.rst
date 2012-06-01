@@ -7,15 +7,16 @@ Boss Development Tools Documentation
 ====================================
 
 The Boss project provides 'Baseline Open Source Software' templates and 
-development tools.  Though Boss is written in Python, it is not limited to any
-particular language. Boss is very beta... any feedback is welcome and 
-appreciated.
+development tools.  It has similarities to Paste Script with regards to 
+templating, but far easier to extend.  Though Boss is written in Python, it is 
+not limited to any particular language. Boss is very beta... any feedback is 
+welcome and appreciated.
 
 Features:
 
  * Supports multiple local, and remote (git) template sources
  * Templates can easily be created and customized to the developers needs
- * Support to pull down, and substitute the name/content of remote files
+ * Support for remote files within templates (i.e. github/gitignore files)
  
 Other sites that might be helpful.
 
