@@ -28,6 +28,10 @@ Other sites that might be helpful.
  * PYPI: http://pypi.python.org/pypi/boss
  *   CI: http://travis-ci.org/#!/derks/boss
 
+Official templates are available from:
+
+ * http://github.com/derks/boss-templates
+ 
  
 Contents:
 
