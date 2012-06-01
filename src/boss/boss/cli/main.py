@@ -45,6 +45,8 @@ def main(*args, **kw):
         from boss.cli.bootstrap import base
         app.setup()
         app.run()
+    except boss_exc.BossTemplateError as e:
+        print "BossTemplateError: %s" % e.msg
     except boss_exc.BossArgumentError as e:
         print "BossArgumentError: %s" % e.msg
     except cement_exc.CementSignalError as e:

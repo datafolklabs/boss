@@ -60,6 +60,10 @@ class SourceManager(object):
             basedir = src['cache']
             
         full_path = os.path.join(basedir, template, 'boss.json')
+        if not os.path.exists(abspath(full_path)):
+            raise boss_exc.BossTemplateError(
+                "The template '%s:%s' does not exist!" % (source, template)
+                )
         f = open(full_path)
         config = json.load(f)
         f.close()

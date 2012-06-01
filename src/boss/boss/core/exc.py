@@ -18,3 +18,6 @@ class BossRuntimeError(BossError):
         
 class BossArgumentError(BossError):
     pass
+
+class BossTemplateError(BossError):
+    pass
