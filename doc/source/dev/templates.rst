@@ -76,7 +76,7 @@ the value of '@foo@' were 'bar' for example, I could do things like:
 
     * @foo.capitalize@ => Bar
     * @foo.upper@ => BAR
-    * @foo.lower@ => BAR
+    * @foo.lower@ => bar
     
 These simple string operations are commonly used throughout templates.  That
 said, don't get carried away ... Boss doesn't intent to be a robust templating
