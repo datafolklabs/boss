@@ -125,14 +125,14 @@ following:
     License: [BSD-three-clause] 
     Project URL: http://helloworld.example.com
     ------------------------------------------------------------------------------
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/README
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/requirements.txt
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/setup.cfg
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/setup.py
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/helloworld/__init__.py
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/tests/test_helloworld.py
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/.gitignore
-    Writing: /Volumes/Data/Users/derks/devel/boss/tmp/helloworld/LICENSE
+    Writing: /Volumes/Users/derks/helloworld/README
+    Writing: /Volumes/Users/derks/helloworld/requirements.txt
+    Writing: /Volumes/Users/derks/helloworld/setup.cfg
+    Writing: /Volumes/Users/derks/helloworld/setup.py
+    Writing: /Volumes/Users/derks/helloworld/helloworld/__init__.py
+    Writing: /Volumes/Users/derks/helloworld/tests/test_helloworld.py
+    Writing: /Volumes/Users/derks/helloworld/.gitignore
+    Writing: /Volumes/Users/derks/helloworld/LICENSE
     
 
 You'll notice a few things in this example:
