@@ -2,7 +2,7 @@
 import os
 import shelve
 from tempfile import mkdtemp
-from cement2.core import hook
+from cement2.core import hook, handler
 from boss.core.utils import abspath
 
 @hook.register(name='cement_post_setup_hook')
@@ -13,16 +13,19 @@ def post_setup(app):
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
 
-        source = dict(
+        app.db['sources'] = dict()
+        sources = app.db['sources']
+        sources['boss'] = dict(
             label='boss',
             path='git@github.com:derks/boss-templates.git',
             cache=cache_dir,
             is_local=False,
             last_sync_time='never'
             ) 
-        app.db['sources'] = dict()
-        app.db['sources']['boss'] = source
-
+        app.db['sources'] = sources
+        contr = handler.get('controller', 'boss')()
+        contr._setup(app)
+        contr.sync()
     if not app.db.has_key('templates'):
         app.db['templates'] = dict()
         

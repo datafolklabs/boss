@@ -10,7 +10,6 @@ from tempfile import mkdtemp
 from datetime import datetime
 from cement2.core.controller import CementBaseController, expose
 from boss.core.utils import abspath, exec_cmd2
-#from boss.core.db import JsonDB
 from boss.core import exc as boss_exc
     
 class BossAbstractBaseController(CementBaseController):
