@@ -23,9 +23,7 @@ def post_setup(app):
             last_sync_time='never'
             ) 
         app.db['sources'] = sources
-        contr = handler.get('controller', 'boss')()
-        contr._setup(app)
-        contr.sync()
+
     if not app.db.has_key('templates'):
         app.db['templates'] = dict()
         

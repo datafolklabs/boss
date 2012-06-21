@@ -85,15 +85,20 @@ class SourceManager(object):
                 if key in word_map:
                     continue
                     
-                pattern = "(.*)\@(%s)([\._a-z0-9]*)\@(.*)" % key
+                pattern = "(.*)\@(%s)\@(.*)" % key
                 m = re.match(pattern, item)
                 if m:
-                    if len(m.group(3)) > 0:
-                        fixed = str(getattr(value, m.group(3).lstrip('.'))())
-                    else:
-                        fixed = str(value)
+                    word_map["@%s@" % m.group(2)] = str(value)
+                else:
+                    pattern = "(.*)\@(%s)\.([_a-z0-9]*)\@(.*)" % key
+                    m = re.match(pattern, item)
+                    if m:
+                        if len(m.group(3)) > 0:
+                            fixed = str(getattr(value, m.group(3))())
+                        else:
+                            fixed = str(value)
 
-                    word_map["@%s%s@" % (m.group(2), m.group(3))] = fixed
+                        word_map["@%s.%s@" % (m.group(2), m.group(3))] = fixed
         
         # actually replace the text
         for pattern,replacement in sorted(word_map.items()):
