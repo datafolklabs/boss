@@ -9,13 +9,167 @@ from urllib2 import urlopen, HTTPError
 from tempfile import mkdtemp
 from datetime import datetime
 from cement2.core.controller import CementBaseController, expose
-from boss.core.utils import abspath, exec_cmd2
+from boss.core.utils import abspath, exec_cmd2, safe_backup
 from boss.core import exc as boss_exc
     
 class BossAbstractBaseController(CementBaseController):
     def _setup(self, *args, **kw):
         super(BossAbstractBaseController, self)._setup(*args, **kw)
             
+class Template(object):
+    def __init__(self, app, path):
+        self.app = app
+        self.basedir = abspath(path)
+        self.config = self._get_config()
+        self._word_map = dict()
+        self._vars = dict()
+        
+    def _get_config(self):
+        full_path = os.path.join(self.basedir, 'boss.json')
+        if not os.path.exists(abspath(full_path)):
+            raise boss_exc.BossTemplateError("Invalid Template: %s" % full_path)
+        f = open(full_path)
+        config = json.load(f)
+        f.close()
+        return config
+        
+    def _populate_vars(self):
+        if self.config.has_key('variables'):
+            for question,var in self.config['variables']:
+                if self.app.config.has_key('answers', var.lower()):
+                    default = self.app.config.get('answers', var.lower())
+                    res = raw_input("%s: [%s] " % (question, default))
+                    if len(res) == 0:
+                        res = default
+                else:
+                    res = raw_input("%s: " % question)
+                self._vars[var] = res.strip()
+                
+    def _sub(self, txt):
+        # do per item substitution rather than entire txt to avoid variable
+        # confusion.  Also allows us to call .capitalize, .lower, etc on the
+        # string after substitution.
+        for line in str(txt).split('\n'):
+            for item in line.split(' '):
+                # Not a template var? (generic pattern)
+                pattern = "(.*)\@(.*)\@(.*)"
+                if not re.match(pattern, item):
+                    continue
+            
+                for key,value in sorted(self._vars.items()):
+                    if key in self._word_map:
+                        continue
+                    
+                    pattern = "(.*)\@(%s)\@(.*)" % key
+                    m = re.match(pattern, item)
+                    if m:
+                        self._word_map["@%s@" % m.group(2)] = str(value)
+                    else:
+                        pattern = "(.*)\@(%s)\.([_a-z0-9]*)\@(.*)" % key
+                        m = re.match(pattern, item)
+                        if m:
+                            if len(m.group(3)) > 0:
+                                fixed = str(getattr(value, m.group(3))())
+                            else:
+                                fixed = str(value)
+
+                            new_key = "@%s.%s@" % (m.group(2), m.group(3))
+                            self._word_map[new_key] = fixed
+        
+        # actually replace the text
+        new_txt = txt
+        for pattern,replacement in sorted(self._word_map.items()):
+            new_txt = re.sub(pattern, replacement, new_txt)
+            
+        return new_txt
+            
+    def _inject(self, dest_path):
+        new_data = ''
+        write_it = False
+        
+        #safe_backup(dest_path, suffix='.boss.bak')
+        f = open(dest_path, 'r')
+        line_num = 0
+        for line in f.readlines():
+            line_num = line_num + 1
+            # only one injection per line is allowed
+            for inj, inj_data in self.config['injections']:
+                m = re.match('(.*)\@boss.mark\:%s\@(.*)' % inj, line)
+                if m:
+                    print "Injecting %s into %s at line #%s" % \
+                        (inj, dest_path, line_num)
+                    line = line + "%s\n" % self._sub(inj_data)
+                    write_it = True
+                    break
+
+            new_data = new_data + line
+        f.close()
+
+        if write_it:                                
+            self._write_file(dest_path, new_data, overwrite=True)
+        
+    def _copy_path(self, tmpl_path, dest_path):
+        f = open(abspath(tmpl_path), 'r')
+        data = f.read()
+        f.close()
+        
+        dest_path = self._sub(abspath(dest_path))
+        dest_data = self._sub(data)
+        self._write_file(dest_path, dest_data)
+            
+    def _write_file(self, dest_path, data, overwrite=False):
+        if os.path.exists(dest_path) and overwrite == False:
+            self.app.log.warn('File Exists: %s' % dest_path)
+            return False
+
+        self.app.log.info('Writing: %s' % dest_path)    
+        if not os.path.exists(os.path.dirname(dest_path)):
+            os.makedirs(os.path.dirname(dest_path))
+        f = open(dest_path, 'w')
+        f.write(data)
+        f.close()
+        return True
+        
+    def copy(self, dest_basedir):
+        self._populate_vars()
+        dest_basedir = abspath(dest_basedir)
+
+        # first handle local files
+        for item in os.walk(self.basedir):
+            cur_tmpl_dir = item[0]
+            cur_tmpl_files = item[2]
+            cur_dest_dir = re.sub(self.basedir, dest_basedir, cur_tmpl_dir)
+            for tmpl_file in cur_tmpl_files:
+                # ignore our config file
+                if tmpl_file == 'boss.json':
+                    continue
+                elif re.match('(.*)\.boss\.bak(.*)', tmpl_file):
+                    continue
+                    
+                tmpl_path = abspath(os.path.join(cur_tmpl_dir, tmpl_file))
+                dest_path = abspath(os.path.join(cur_dest_dir, tmpl_file))
+                self._copy_path(tmpl_path, dest_path)
+        
+        # second handle external files
+        if self.config.has_key('external_files'):
+            for _file,remote_uri in self.config['external_files']:
+                dest_path = self._sub(os.path.join(dest_basedir, _file))
+                remote_uri = self._sub(remote_uri)
+                try:
+                    data = self._sub(urlopen(remote_uri).read())
+                except HTTPError as e:
+                    data = ''
+
+                self._write_file(dest_path, data)
+        
+        # lastly do injections
+        if self.config.has_key('injections') and \
+           len(self.config['injections']) > 0:
+            for item in os.walk(dest_basedir):
+                for _file in item[2]:
+                    dest_path = abspath(os.path.join(item[0], _file))
+                    self._inject(dest_path)
+                    
 class SourceManager(object):
     def __init__(self, app):
         self.app = app
@@ -51,146 +205,16 @@ class SourceManager(object):
                 templates.append(entry)
         return templates
     
-    def get_template_config(self, source, template):
-        src = self.app.db['sources'][source]
-        if src['is_local']:
-            basedir = src['path']
-        else:
-            basedir = src['cache']
-            
-        full_path = os.path.join(basedir, template, 'boss.json')
-        if not os.path.exists(abspath(full_path)):
-            raise boss_exc.BossTemplateError(
-                "The template '%s:%s' does not exist!" % (source, template)
-                )
-        f = open(full_path)
-        config = json.load(f)
-        f.close()
-        return config
-        
-    def _sub(self, txt, variables):
-        new_txt = txt
-        word_map = dict()
-        
-        # do per item substitution rather than entire txt to avoid variable
-        # confusion.  Also allows us to call .capitalize, .lower, etc on the
-        # string after substitution.
-        for item in str(txt).split(' '):
-            # Not a template var? (generic patern)
-            pattern = "(.*)\@(.*)\@(.*)"
-            if not re.match(pattern, item):
-                continue
-                
-            for key,value in sorted(variables.items()):
-                if key in word_map:
-                    continue
-                    
-                pattern = "(.*)\@(%s)\@(.*)" % key
-                m = re.match(pattern, item)
-                if m:
-                    word_map["@%s@" % m.group(2)] = str(value)
-                else:
-                    pattern = "(.*)\@(%s)\.([_a-z0-9]*)\@(.*)" % key
-                    m = re.match(pattern, item)
-                    if m:
-                        if len(m.group(3)) > 0:
-                            fixed = str(getattr(value, m.group(3))())
-                        else:
-                            fixed = str(value)
-
-                        word_map["@%s.%s@" % (m.group(2), m.group(3))] = fixed
-        
-        # actually replace the text
-        for pattern,replacement in sorted(word_map.items()):
-            new_txt = re.sub(pattern, replacement, new_txt)
-            
-        return new_txt
-        
-    def _fix_file(self, file_name, file_data, variables):
-        for var in variables:
-            # modify file name
-            file_name = self._sub(file_name, variables)
-            
-            # modify file content
-            file_data = self._sub(file_data, variables)
-            
-        return (file_name, file_data)
-        
     def create_from_template(self, source, template, dest_dir):
         src = self.app.db['sources'][source]
-        config = self.get_template_config(source, template)
-        _vars = dict()
-        if config.has_key('variables'):
-            for question,_var in config['variables']:
-                if self.app.config.has_key('answers', _var.lower()):
-                    default = self.app.config.get('answers', _var.lower())
-                    res = raw_input("%s: [%s] " % (question, default))
-                    if len(res) == 0:
-                        res = default
-                else:
-                    res = raw_input("%s: " % question)
-                _vars[_var] = res.strip()
-        
         if src['is_local']:
             basedir = os.path.join(src['path'], template)
         else:
             basedir = os.path.join(src['cache'], template)
-            
-        print '-' * 78
-        for pth in os.walk(basedir):
-            new_basedir = re.sub(basedir, dest_dir, pth[0])
-            for _file in pth[2]:
-                full_path = abspath(os.path.join(pth[0], _file))
-                
-                if _file == 'boss.json':
-                    continue
-                dest_file = abspath(os.path.join(new_basedir, _file))
-                
-                f = open(full_path, 'r')
-                data = f.read()
-                f.close()
-                
-                dest_file, data = self._fix_file(dest_file, data, _vars)
-                
-                if os.path.exists(dest_file):
-                    print 'File Exists: %s' % dest_file
-                    continue
-                else:
-                    print 'Writing: %s' % dest_file
-                    
-                    if not os.path.exists(os.path.dirname(dest_file)):
-                        os.makedirs(os.path.dirname(dest_file))
-                        
-                    f = open(dest_file, 'w')
-                    f.write(data)
-                    f.close()
         
-        # setup external files
-        if config.has_key('external_files'):
-            for _file in config['external_files']:
-                new_basedir = abspath(re.sub(basedir, dest_dir, basedir))
-                dest_file = abspath(os.path.join(new_basedir, _file[0]))
-                url, _ = self._fix_file(_file[1], '', _vars)
-                try:
-                    data = urlopen(url).read()
-                except HTTPError as e:
-                    data = ''
-
-                dest_file, data = self._fix_file(dest_file, data, _vars)
-                
-                if os.path.exists(dest_file):
-                    print 'File Exists: %s' % dest_file
-                    continue
-                else:
-                    print 'Writing: %s' % dest_file
-                    
-                    if not os.path.exists(os.path.dirname(dest_file)):
-                        os.makedirs(os.path.dirname(dest_file))
-                        
-                    f = open(dest_file, 'w')
-                    f.write(data)
-                    f.close()
-                    
+        tmpl = Template(self.app, abspath(basedir))
+        tmpl.copy(dest_dir)
+     
 class BossBaseController(BossAbstractBaseController):
     class Meta:
         label = 'boss'
