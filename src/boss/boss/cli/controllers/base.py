@@ -87,7 +87,6 @@ class Template(object):
         new_data = ''
         write_it = False
         
-        #safe_backup(dest_path, suffix='.boss.bak')
         f = open(dest_path, 'r')
         line_num = 0
         for line in f.readlines():
@@ -106,6 +105,7 @@ class Template(object):
         f.close()
 
         if write_it:                                
+            safe_backup(dest_path, suffix='.boss.bak')
             self._write_file(dest_path, new_data, overwrite=True)
         
     def _copy_path(self, tmpl_path, dest_path):
@@ -129,27 +129,26 @@ class Template(object):
         f.write(data)
         f.close()
         return True
-        
+    
+    def _walk_path(self, path):
+        for items in os.walk(abspath(path)):
+            for _file in items[2]:
+                if _file == 'boss.json':
+                    continue
+                elif re.match('(.*)\.boss\.bak(.*)', _file):
+                    continue    
+                else: 
+                    yield abspath(os.path.join(items[0], _file))
+                    
     def copy(self, dest_basedir):
         self._populate_vars()
         dest_basedir = abspath(dest_basedir)
 
         # first handle local files
-        for item in os.walk(self.basedir):
-            cur_tmpl_dir = item[0]
-            cur_tmpl_files = item[2]
-            cur_dest_dir = re.sub(self.basedir, dest_basedir, cur_tmpl_dir)
-            for tmpl_file in cur_tmpl_files:
-                # ignore our config file
-                if tmpl_file == 'boss.json':
-                    continue
-                elif re.match('(.*)\.boss\.bak(.*)', tmpl_file):
-                    continue
-                    
-                tmpl_path = abspath(os.path.join(cur_tmpl_dir, tmpl_file))
-                dest_path = abspath(os.path.join(cur_dest_dir, tmpl_file))
-                self._copy_path(tmpl_path, dest_path)
-        
+        for tmpl_path in self._walk_path(self.basedir):
+            dest_path = abspath(re.sub(self.basedir, dest_basedir, tmpl_path))
+            self._copy_path(tmpl_path, dest_path)
+               
         # second handle external files
         if self.config.has_key('external_files'):
             for _file,remote_uri in self.config['external_files']:
@@ -161,15 +160,13 @@ class Template(object):
                     data = ''
 
                 self._write_file(dest_path, data)
-        
+
         # lastly do injections
-        if self.config.has_key('injections') and \
-           len(self.config['injections']) > 0:
-            for item in os.walk(dest_basedir):
-                for _file in item[2]:
-                    dest_path = abspath(os.path.join(item[0], _file))
-                    self._inject(dest_path)
+        if self.config.has_key('injections') and len(self.config['injections']) > 0:
+            for dest_path in self._walk_path(dest_basedir):
+                self._inject(dest_path)
                     
+
 class SourceManager(object):
     def __init__(self, app):
         self.app = app
@@ -337,5 +334,15 @@ class BossBaseController(BossAbstractBaseController):
         del sources[self.app.pargs.modifier1]
         self.app.db['sources'] = sources
     
+    @expose(help="remove .boss.bak* files from path")
+    def clean(self):
+        if not self.app.pargs.modifier1:
+            raise boss_exc.BossArgumentError("Project path required.")
+        for items in os.walk(self.app.pargs.modifier1):
+            for _file in items[2]:
+                path = abspath(os.path.join(items[0], _file))
+                if re.match('(.*)\.boss\.bak(.*)', path):
+                    self.app.log.warn("Removing: %s" % _file)
+                    os.remove(path)
             
     
