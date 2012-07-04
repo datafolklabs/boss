@@ -1,35 +1,32 @@
-
-NAME: boss
-
-AUTHOR: BJ Dierkes <derks@bjdierkes.com>
-
-DESCRIPTION:
+Boss Development Templates and Utilities
+========================================
 
 The Boss project provides 'Baseline Open Source Software' templates and 
-development tools.  It has similarities to Paste Script with regards to 
+development tools.  It has similarities to PasteScript with regards to 
 templating, but far easier to extend.  Though Boss is written in Python, it is 
 not limited to any particular language. Boss is very beta... any feedback is 
 welcome and appreciated.
 
-Features:
+**Features**
 
  * Supports multiple local, and remote (git) template sources
  * Templates can easily be created and customized to the developers needs
  * Support for remote files within templates (i.e. github/gitignore files)
- 
-Other sites that might be helpful.
+  
+**More Information**
 
  * RTFD: http://boss.readthedocs.org/en/latest/
  * CODE: https://github.com/derks/boss/
  * PYPI: http://pypi.python.org/pypi/boss
  *   CI: http://travis-ci.org/#!/derks/boss
 
-Official templates are available from:
+**Official Templates**
 
  * http://github.com/derks/boss-templates
  
  
-LICENSE:
+License
+-------
 
 The Boss project is Open Source and is distributed under the BSD License 
 (three clause).  Please see the LICENSE file included with this software.  

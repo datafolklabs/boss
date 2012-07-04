@@ -1,9 +1,0 @@
-[run]
-include = src/boss/boss/*.py
-
-[report]
-ignore_errors = True
-
-[html]
-directory = coverage_html_report
-

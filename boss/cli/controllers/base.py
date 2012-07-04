@@ -8,8 +8,8 @@ import re
 from urllib2 import urlopen, HTTPError
 from tempfile import mkdtemp
 from datetime import datetime
-from cement2.core.controller import CementBaseController, expose
-from boss.core.utils import abspath, exec_cmd2, safe_backup
+from cement.core.controller import CementBaseController, expose
+from cement.utils import fs, shell
 from boss.core import exc as boss_exc
     
 class BossAbstractBaseController(CementBaseController):
@@ -19,14 +19,14 @@ class BossAbstractBaseController(CementBaseController):
 class Template(object):
     def __init__(self, app, path):
         self.app = app
-        self.basedir = abspath(path)
+        self.basedir = fs.abspath(path)
         self.config = self._get_config()
         self._word_map = dict()
         self._vars = dict()
         
     def _get_config(self):
         full_path = os.path.join(self.basedir, 'boss.json')
-        if not os.path.exists(abspath(full_path)):
+        if not os.path.exists(fs.abspath(full_path)):
             raise boss_exc.BossTemplateError("Invalid Template: %s" % full_path)
         f = open(full_path)
         config = json.load(f)
@@ -105,15 +105,15 @@ class Template(object):
         f.close()
 
         if write_it:                                
-            safe_backup(dest_path, suffix='.boss.bak')
+            fs.backup(dest_path, suffix='.boss.bak')
             self._write_file(dest_path, new_data, overwrite=True)
         
     def _copy_path(self, tmpl_path, dest_path):
-        f = open(abspath(tmpl_path), 'r')
+        f = open(fs.abspath(tmpl_path), 'r')
         data = f.read()
         f.close()
         
-        dest_path = self._sub(abspath(dest_path))
+        dest_path = self._sub(fs.abspath(dest_path))
         dest_data = self._sub(data)
         self._write_file(dest_path, dest_data)
             
@@ -131,22 +131,22 @@ class Template(object):
         return True
     
     def _walk_path(self, path):
-        for items in os.walk(abspath(path)):
+        for items in os.walk(fs.abspath(path)):
             for _file in items[2]:
                 if _file == 'boss.json':
                     continue
                 elif re.match('(.*)\.boss\.bak(.*)', _file):
                     continue    
                 else: 
-                    yield abspath(os.path.join(items[0], _file))
+                    yield fs.abspath(os.path.join(items[0], _file))
                     
     def copy(self, dest_basedir):
         self._populate_vars()
-        dest_basedir = abspath(dest_basedir)
+        dest_basedir = fs.abspath(dest_basedir)
 
         # first handle local files
         for tmpl_path in self._walk_path(self.basedir):
-            dest_path = abspath(re.sub(self.basedir, dest_basedir, tmpl_path))
+            dest_path = fs.abspath(re.sub(self.basedir, dest_basedir, tmpl_path))
             self._copy_path(tmpl_path, dest_path)
                
         # second handle external files
@@ -176,11 +176,11 @@ class SourceManager(object):
         src = self.app.db['sources'][source]
         if not src['is_local']:
             if not os.path.exists(os.path.join(src['cache'], '.git')):
-                exec_cmd2([ 'git', 'clone', 
-                            src['path'], src['cache'] ])
+                shell.exec_cmd2([ 'git', 'clone', 
+                                src['path'], src['cache'] ])
             else:
                 os.chdir(src['cache'])
-                exec_cmd2(['git', 'pull'])
+                shell.exec_cmd2(['git', 'pull'])
         src['last_sync_time'] = datetime.now()
         sources[source] = src
         self.app.db['sources'] = sources
@@ -209,7 +209,7 @@ class SourceManager(object):
         else:
             basedir = os.path.join(src['cache'], template)
         
-        tmpl = Template(self.app, abspath(basedir))
+        tmpl = Template(self.app, fs.abspath(basedir))
         tmpl.copy(dest_dir)
      
 class BossBaseController(BossAbstractBaseController):
@@ -307,7 +307,7 @@ class BossBaseController(BossAbstractBaseController):
         cache_dir = mkdtemp(dir=self.app.config.get('boss', 'cache_dir'))
 
         if self.app.pargs.local:
-            path = abspath(path)
+            path = fs.abspath(path)
             
         sources[label] = dict(
             label=label,
@@ -340,7 +340,7 @@ class BossBaseController(BossAbstractBaseController):
             raise boss_exc.BossArgumentError("Project path required.")
         for items in os.walk(self.app.pargs.modifier1):
             for _file in items[2]:
-                path = abspath(os.path.join(items[0], _file))
+                path = fs.abspath(os.path.join(items[0], _file))
                 if re.match('(.*)\.boss\.bak(.*)', path):
                     self.app.log.warn("Removing: %s" % _file)
                     os.remove(path)

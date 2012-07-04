@@ -32,7 +32,7 @@ setup(name='boss',
         # 'coverage',
         #
         ### Required to function
-        'cement2',
+        'cement',
         ],
     setup_requires=[],
     entry_points="""

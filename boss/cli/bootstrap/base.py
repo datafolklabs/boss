@@ -2,16 +2,14 @@
 import os
 import shelve
 from tempfile import mkdtemp
-from cement2.core import hook, handler
-from boss.core.utils import abspath
+from cement.core import hook, handler
+from cement.utils import fs
 
 @hook.register(name='cement_post_setup_hook')
 def post_setup(app):
     app.extend('db', shelve.open(app.config.get('boss', 'db_path')))
     if not app.db.has_key('sources'):
-        cache_dir = abspath(mkdtemp(dir=app.config.get('boss', 'cache_dir')))
-        if not os.path.exists(cache_dir):
-            os.makedirs(cache_dir)
+        cache_dir = fs.abspath(mkdtemp(dir=app.config.get('boss', 'cache_dir')))
 
         app.db['sources'] = dict()
         sources = app.db['sources']

@@ -1,9 +1,9 @@
 
 import os
-from cement2.core import foundation, backend
-from cement2.core import exc as cement_exc
+from cement.core import foundation, backend
+from cement.core import exc as cement_exc
+from cement.utils import fs
 from boss.cli.controllers.base import BossBaseController
-from boss.core.utils import abspath
 from boss.core import exc as boss_exc
 
 defaults = backend.defaults('boss', 'answers')
@@ -24,7 +24,7 @@ class BossApp(foundation.CementApp):
     def validate_config(self):
         # fix up paths
         self.config.set('boss', 'data_dir', 
-                        abspath(self.config.get('boss', 'data_dir')))
+                        fs.abspath(self.config.get('boss', 'data_dir')))
 
         # create directories
         if not os.path.exists(self.config.get('boss', 'data_dir')):
@@ -32,15 +32,15 @@ class BossApp(foundation.CementApp):
     
         # add shortcuts
         pth = os.path.join(self.config.get('boss', 'data_dir'), 'cache')
-        if not os.path.exists(abspath(pth)):
-            os.makedirs(abspath(pth))
+        if not os.path.exists(fs.abspath(pth)):
+            os.makedirs(fs.abspath(pth))
         self.config.set('boss', 'cache_dir', pth)
     
         pth = os.path.join(self.config.get('boss', 'data_dir'), 'boss.db')
         self.config.set('boss', 'db_path', pth)
-
-def main(*args, **kw):
-    app = BossApp(*args, **kw)
+        
+def main():
+    app = BossApp()
     try:
         from boss.cli.bootstrap import base
         app.setup()
@@ -55,5 +55,15 @@ def main(*args, **kw):
     finally:
         app.close()
 
+def get_test_app(**kw):
+    from tempfile import mkdtemp
+    test_defaults = defaults
+    test_defaults['boss']['data_dir'] = mkdtemp()
+    kw['defaults'] = kw.get('defaults', test_defaults)
+    kw['config_files'] = kw.get('config_files', [])
+    kw['default_sources'] = kw.get('default_sources', None)
+    app = BossApp(**kw)
+    return app
+    
 if __name__ == '__main__':
     main()

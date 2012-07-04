@@ -26,7 +26,7 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 templates
-coverage_html_report
+coverage_html
 test.py
 test.conf
 tmp/

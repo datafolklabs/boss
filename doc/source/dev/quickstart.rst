@@ -23,21 +23,8 @@ branch from GitHub.
 
 .. code-block:: text
 
-    $ git clone git://github.com/derks/boss.git
+    $ pip install -e git+git://github.com/derks/boss.git#egg=boss
     
-    $ cd boss/src/boss
-    
-    $ python setup.py install
-    
-
-To run tests, do the following from the 'root' directory:
-
-.. code-block:: text
-    
-    $ pip install nose coverage
-    
-    $ ./utils/run_tests.sh
-
 
 Working with Sources
 --------------------
