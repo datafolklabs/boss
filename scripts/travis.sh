@@ -3,4 +3,5 @@
 pip install nose --use-mirrors
 pip install coverage --use-mirrors
 pip install -r src/boss/requirements.txt --use-mirrors
-exit 0
+python setup.py nosetests
+exit $?
