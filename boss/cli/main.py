@@ -38,7 +38,7 @@ class BossApp(foundation.CementApp):
     
         pth = os.path.join(self.config.get('boss', 'data_dir'), 'boss.db')
         self.config.set('boss', 'db_path', pth)
-        
+                
 def main():
     app = BossApp()
     try:
@@ -57,11 +57,13 @@ def main():
 
 def get_test_app(**kw):
     from tempfile import mkdtemp
+
     test_defaults = defaults
     test_defaults['boss']['data_dir'] = mkdtemp()
     kw['defaults'] = kw.get('defaults', test_defaults)
     kw['config_files'] = kw.get('config_files', [])
     kw['default_sources'] = kw.get('default_sources', None)
+
     app = BossApp(**kw)
     return app
     
