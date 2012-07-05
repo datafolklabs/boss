@@ -20,7 +20,6 @@ class BossApp(foundation.CementApp):
             '~/.boss.conf',
             '~/.boss/config',
             ]
-        default_sources = dict(boss='https://github.com/derks/boss-templates.git')
         
     def setup(self):
         if 'boss.cli.bootstrap.base' not in sys.modules:

@@ -15,7 +15,7 @@ def post_setup(app):
         sources = app.db['sources']
         sources['boss'] = dict(
             label='boss',
-            path='git@github.com:derks/boss-templates.git',
+            path='https://github.com/derks/boss-templates.git',
             cache=cache_dir,
             is_local=False,
             last_sync_time='never'
