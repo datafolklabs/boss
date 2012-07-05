@@ -6,9 +6,6 @@ from cement.core import backend
 from cement.utils import test_helper as _t
 import boss
 from boss.cli.main import get_test_app
-
-if sys.version_info[0] >= 3:
-    from imp import reload
     
 class CLITestCase(unittest.TestCase):
     def setUp(self):

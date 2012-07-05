@@ -7,6 +7,9 @@ from cement.utils import fs
 from boss.cli.controllers.base import BossBaseController
 from boss.core import exc as boss_exc
 
+if sys.version_info[0] >= 3:
+    from imp import reload
+    
 defaults = backend.defaults('boss', 'answers')
 defaults['boss']['data_dir'] = '~/.boss/'
 
