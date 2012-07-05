@@ -31,7 +31,9 @@ class Template(object):
     def _get_config(self):
         full_path = os.path.join(self.basedir, 'boss.json')
         if not os.path.exists(fs.abspath(full_path)):
-            raise boss_exc.BossTemplateError("Invalid Template: %s" % full_path)
+            raise boss_exc.BossTemplateError(
+                "Invalid Template: %s" % os.path.dirname(full_path)
+                )
         f = open(full_path)
         config = json.load(f)
         f.close()

@@ -14,11 +14,8 @@
 import sys, os
 VERSION = '0.9.1'
 
-import sys, os
-sys.path.insert(0, os.path.abspath('../../src/boss/'))
-
 # If we dont' prep an app, then we'll get runtime errors
-from cement2.test_helper import prep
+from cement.utils.test_helper import prep
 prep()
 
 # If extensions (or modules to document with autodoc) are in another directory,

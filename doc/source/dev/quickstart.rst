@@ -90,7 +90,7 @@ work with:
 
     Boss Templates
     ------------------------------------------------------------------------------
-    cement2-script
+    cement-script
     e2e
     license
     python
