@@ -1,5 +1,6 @@
 
 import os
+import sys
 from cement.core import foundation, backend
 from cement.core import exc as cement_exc
 from cement.utils import fs
@@ -20,6 +21,14 @@ class BossApp(foundation.CementApp):
             '~/.boss/config',
             ]
         default_sources = dict(boss='git@github.com:derks/boss-templates.git')
+        
+    def setup(self):
+        if 'boss.cli.bootstrap.base' not in sys.modules:
+            import boss.cli.bootstrap.base            
+        else:
+            import boss
+            reload(boss.cli.bootstrap.base)
+        super(BossApp, self).setup()
         
     def validate_config(self):
         # fix up paths
@@ -42,7 +51,6 @@ class BossApp(foundation.CementApp):
 def main():
     app = BossApp()
     try:
-        from boss.cli.bootstrap import base
         app.setup()
         app.run()
     except boss_exc.BossTemplateError as e:
