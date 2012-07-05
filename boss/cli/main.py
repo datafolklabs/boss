@@ -46,12 +46,12 @@ def main():
         app.setup()
         app.run()
     except boss_exc.BossTemplateError as e:
-        print "BossTemplateError: %s" % e.msg
+        print("BossTemplateError: %s" % e.msg)
     except boss_exc.BossArgumentError as e:
-        print "BossArgumentError: %s" % e.msg
+        print("BossArgumentError: %s" % e.msg)
     except cement_exc.CementSignalError as e:
-        print
-        print e
+        print()
+        print(e)
     finally:
         app.close()
 

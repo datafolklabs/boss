@@ -8,7 +8,7 @@ from cement.utils import fs
 @hook.register(name='cement_post_setup_hook')
 def post_setup(app):
     app.extend('db', shelve.open(app.config.get('boss', 'db_path')))
-    if not app.db.has_key('sources'):
+    if 'sources' not in app.db.keys():
         cache_dir = fs.abspath(mkdtemp(dir=app.config.get('boss', 'cache_dir')))
 
         app.db['sources'] = dict()
@@ -22,7 +22,7 @@ def post_setup(app):
             ) 
         app.db['sources'] = sources
 
-    if not app.db.has_key('templates'):
+    if 'templates' not in app.db.keys():
         app.db['templates'] = dict()
         
 @hook.register(name='cement_on_close_hook')

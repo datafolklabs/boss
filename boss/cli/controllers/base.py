@@ -5,12 +5,16 @@ import shutil
 import shelve
 import json
 import re
-from urllib2 import urlopen, HTTPError
 from tempfile import mkdtemp
 from datetime import datetime
 from cement.core.controller import CementBaseController, expose
 from cement.utils import fs, shell
 from boss.core import exc as boss_exc
+    
+if sys.version_info[0] < 3:
+    from urllib2 import urlopen, HTTPError # pragma: no cover
+else:
+    from urllib.request import urlopen, HTTPError # pragma: no cover
     
 class BossAbstractBaseController(CementBaseController):
     def _setup(self, *args, **kw):
@@ -95,8 +99,8 @@ class Template(object):
             for inj, inj_data in self.config['injections']:
                 m = re.match('(.*)\@boss.mark\:%s\@(.*)' % inj, line)
                 if m:
-                    print "Injecting %s into %s at line #%s" % \
-                        (inj, dest_path, line_num)
+                    print("Injecting %s into %s at line #%s" % \
+                        (inj, dest_path, line_num))
                     line = line + "%s\n" % self._sub(inj_data)
                     write_it = True
                     break
@@ -229,7 +233,7 @@ class BossBaseController(BossAbstractBaseController):
     
     @expose(hide=True)
     def default(self):
-        print "A sub-command is required.  Please see --help."
+        print("A sub-command is required.  Please see --help.")
         sys.exit(1)
         
     @expose(help="create project files from a template")
@@ -255,11 +259,11 @@ class BossBaseController(BossAbstractBaseController):
 
     @expose(help="list all available templates")
     def templates(self):
-        print
+        print()
         sources = self.app.db['sources']
         for label in sources:
-            print "%s Templates" % label.capitalize()
-            print '-' * 78
+            print("%s Templates" % label.capitalize())
+            print('-' * 78)
             if label == 'local':
                 local_path = sources[label]
                 remote_path = None
@@ -271,30 +275,30 @@ class BossBaseController(BossAbstractBaseController):
                         
             src = SourceManager(self.app)
             for tmpl in src.get_templates(label):
-                print tmpl
+                print(tmpl)
                 
-            print
+            print()
 
     @expose(help="sync a source repository")
     def sync(self):
         _sources = self.app.db['sources']
         for label in self.app.db['sources']:
-            print "Syncing %s Templates . . . " % label.capitalize()
+            print("Syncing %s Templates . . . " % label.capitalize())
             src = SourceManager(self.app)
             src.sync(label)
-            print
+            print()
             
     @expose(help="list template source repositories")
     def sources(self):
         for key in self.app.db['sources']:
             src = self.app.db['sources'][key]
-            print
-            print "--        Label: %s" % src['label']
-            print "    Source Path: %s" % src['path']
-            print "          Cache: %s" % src['cache']
-            print "     Local Only: %s" % src['is_local']
-            print " Last Sync Time: %s" % src['last_sync_time']
-        print
+            print()
+            print("--        Label: %s" % src['label'])
+            print("    Source Path: %s" % src['path'])
+            print("          Cache: %s" % src['cache'])
+            print("     Local Only: %s" % src['is_local'])
+            print(" Last Sync Time: %s" % src['last_sync_time'])
+        print()
             
     @expose(help="add a template source repository")
     def add_source(self):
