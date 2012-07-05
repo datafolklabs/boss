@@ -1,1 +1,1 @@
--e git+git@github.com:cement/cement.git#egg=cement
+-e git+https://github.com/cement/cement.git#egg=cement
