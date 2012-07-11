@@ -60,7 +60,6 @@ def main():
     except boss_exc.BossArgumentError as e:
         print("BossArgumentError: %s" % e.msg)
     except cement_exc.CementSignalError as e:
-        print()
         print(e)
     finally:
         app.close()

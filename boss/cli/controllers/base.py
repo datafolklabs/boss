@@ -261,7 +261,7 @@ class BossBaseController(BossAbstractBaseController):
 
     @expose(help="list all available templates")
     def templates(self):
-        print()
+        print('')
         sources = self.app.db['sources']
         for label in sources:
             print("%s Templates" % label.capitalize())
@@ -279,7 +279,7 @@ class BossBaseController(BossAbstractBaseController):
             for tmpl in src.get_templates(label):
                 print(tmpl)
                 
-            print()
+            print('')
 
     @expose(help="sync a source repository")
     def sync(self):
@@ -294,13 +294,13 @@ class BossBaseController(BossAbstractBaseController):
     def sources(self):
         for key in self.app.db['sources']:
             src = self.app.db['sources'][key]
-            print()
+            print('')
             print("--        Label: %s" % src['label'])
             print("    Source Path: %s" % src['path'])
             print("          Cache: %s" % src['cache'])
             print("     Local Only: %s" % src['is_local'])
             print(" Last Sync Time: %s" % src['last_sync_time'])
-        print()
+        print('')
             
     @expose(help="add a template source repository")
     def add_source(self):
