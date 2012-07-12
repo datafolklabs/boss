@@ -288,7 +288,7 @@ class BossBaseController(BossAbstractBaseController):
             print("Syncing %s Templates . . . " % label.capitalize())
             src = SourceManager(self.app)
             src.sync(label)
-            print()
+            print('')
             
     @expose(help="list template source repositories")
     def sources(self):
