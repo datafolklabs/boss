@@ -246,7 +246,7 @@ class BossBaseController(BossAbstractBaseController):
         if not self.app.pargs.template:
             raise boss_exc.BossArgumentError("Template label required.")
         
-        sources = self.app.db.get('sources', self.app._meta.default_sources)    
+        sources = self.app.db.get('sources')    
         
         try:
             tmpl_parts = self.app.pargs.template.split(':')

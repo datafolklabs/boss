@@ -16,6 +16,7 @@ defaults['boss']['data_dir'] = '~/.boss/'
 class BossApp(foundation.CementApp):
     class Meta:
         label = 'boss'
+        bootstrap = 'boss.cli.bootstrap'
         base_controller = BossBaseController
         config_defaults = defaults
         config_files = [
@@ -23,15 +24,7 @@ class BossApp(foundation.CementApp):
             '~/.boss.conf',
             '~/.boss/config',
             ]
-        
-    def setup(self):
-        if 'boss.cli.bootstrap.base' not in sys.modules:
-            import boss.cli.bootstrap.base            
-        else:
-            import boss
-            reload(boss.cli.bootstrap.base)
-        super(BossApp, self).setup()
-        
+
     def validate_config(self):
         # fix up paths
         self.config.set('boss', 'data_dir', 
