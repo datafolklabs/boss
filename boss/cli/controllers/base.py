@@ -40,16 +40,30 @@ class Template(object):
         self._word_map = dict()
         self._vars = dict()
         
+        print self.config
     def _get_config(self):
-        full_path = os.path.join(self.basedir, 'boss.json')
-        if not os.path.exists(fs.abspath(full_path)):
-            raise boss_exc.BossTemplateError(
-                "Invalid Template: %s" % os.path.dirname(full_path)
-                )
-        f = open(full_path)
-        config = json.load(f)
-        f.close()
-        return config
+        config_path = None
+        full_paths = [
+            fs.abspath(os.path.join(self.basedir, 'boss.json')),
+            fs.abspath(os.path.join(self.basedir, 'boss.yaml')),
+            ]
+        
+        for path in full_paths:
+            if os.path.exists(path):
+                config_path = path
+                if os.path.basename(path) == 'boss.json':
+                    from json import load as config_reader
+                elif os.path.basename(path) == 'boss.yaml':
+                    from yaml import load as config_reader
+
+                self.app.log.debug('Found template config %s' % path)
+                break
+        
+        if not config_path:
+            raise boss_exc.BossTemplateError("Invalid template config.")
+        else:    
+            
+            return config_reader(open(config_path, 'r'))
         
     def _populate_vars(self):
         if self.config.has_key('variables'):
