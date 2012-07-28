@@ -1,1 +1,1 @@
--e git+https://github.com/cement/cement.git#egg=cement
+cement >=1.9.14
