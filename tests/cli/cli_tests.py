@@ -1,16 +1,12 @@
 
 import sys
 import shutil
-import unittest
 from cement.core import backend
-from cement.utils import test_helper as _t
+from cement.utils import test
 import boss
 from boss.cli.main import get_test_app
     
-class CLITestCase(unittest.TestCase):
-    def setUp(self):
-        _t.prep()
-    
+class CLITestCase(test.CementTestCase):
     def test_cli(self):
         app = get_test_app(argv=['templates'])
         app.setup()
