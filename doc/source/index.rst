@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Boss Development Tools Documentation
-====================================
+Boss Development Tools
+======================
 
 The Boss project provides 'Baseline Open Source Software' templates and 
 development tools.  It has similarities to Paste Script with regards to 

@@ -12,11 +12,12 @@
 # serve to show the default.
 
 import sys, os
-VERSION = '0.9.1'
 
 # If we dont' prep an app, then we'll get runtime errors
-from cement.utils.test_helper import prep
-prep()
+from cement.utils import test
+fakeapp = test.TestApp()
+
+from boss import VERSION
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -98,7 +99,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
