@@ -1,8 +1,7 @@
 
 from setuptools import setup, find_packages
 import sys, os
-
-VERSION = '0.9.1'
+from boss import VERSION
 
 LONG = """
 Boss is a development utility that provides quick access to reusable project

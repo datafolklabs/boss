@@ -9,6 +9,7 @@ from tempfile import mkdtemp
 from datetime import datetime
 from cement.core.controller import CementBaseController, expose
 from cement.utils import fs, shell
+from boss import VERSION
 from boss.core import exc as boss_exc
     
 if sys.version_info[0] < 3:
@@ -16,10 +17,21 @@ if sys.version_info[0] < 3:
 else:
     from urllib.request import urlopen, HTTPError # pragma: no cover
     
-class BossAbstractBaseController(CementBaseController):
-    def _setup(self, *args, **kw):
-        super(BossAbstractBaseController, self)._setup(*args, **kw)
-            
+    
+BANNER = """
+
+  _______  _______ _______ _______ 
+ |   _   \|   _   |   _   |   _   |
+ |.  1   /|.  |   |   1___|   1___|
+ |.  _   \|.  |   |____   |____   |
+ |:  1    |:  1   |:  1   |:  1   |
+ |::.. .  |::.. . |::.. . |::.. . |
+ `-------'`-------`-------`-------'
+               (c) 2012 BJ Dierkes
+                           v%s
+                           
+""" % VERSION
+
 class Template(object):
     def __init__(self, app, path):
         self.app = app
@@ -218,7 +230,7 @@ class SourceManager(object):
         tmpl = Template(self.app, fs.abspath(basedir))
         tmpl.copy(dest_dir)
      
-class BossBaseController(BossAbstractBaseController):
+class BossBaseController(CementBaseController):
     class Meta:
         label = 'boss'
         description = 'Boss Templates and Development Utilities'
@@ -228,6 +240,7 @@ class BossBaseController(BossAbstractBaseController):
             (['--local'], 
              dict(help='toggle a local source repository', 
                   action='store_true', default=False)),
+            (['--version'], dict(action='version', version=BANNER)),
             (['modifier1'], dict(help='command modifier', nargs='?')),
             (['modifier2'], dict(help='command modifier', nargs='?')),
             ]
