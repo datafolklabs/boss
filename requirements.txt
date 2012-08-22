@@ -1,1 +1,2 @@
-cement >=1.9.14
+cement >=2.0.2
+pyyaml

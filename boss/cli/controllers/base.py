@@ -39,35 +39,50 @@ class Template(object):
         self.config = self._get_config()
         self._word_map = dict()
         self._vars = dict()
-        
-        print self.config
-    def _get_config(self):
-        config_path = None
-        full_paths = [
-            fs.abspath(os.path.join(self.basedir, 'boss.json')),
-            fs.abspath(os.path.join(self.basedir, 'boss.yaml')),
-            ]
-        
-        for path in full_paths:
-            if os.path.exists(path):
-                config_path = path
-                if os.path.basename(path) == 'boss.json':
-                    from json import load as config_reader
-                elif os.path.basename(path) == 'boss.yaml':
-                    from yaml import load as config_reader
 
-                self.app.log.debug('Found template config %s' % path)
-                break
+    def _get_config(self):
+        possibles = [
+            fs.abspath(os.path.join(self.basedir, 'boss.json')),
+            fs.abspath(os.path.join(self.basedir, 'boss.yml')),
+            ]
+        for path in possibles:
+            if os.path.exists(path):
+                if os.path.basename(path) == 'boss.json':
+                    return self._get_json_config(path)
+                elif os.path.basename(path) == 'boss.yml':
+                    return self._get_yaml_config(path)
         
-        if not config_path:
+        # if not, raise
+        raise boss_exc.BossTemplateError("No supported config found.")
+                
+    def _get_json_config(self, path):
+        full_path = fs.abspath(path)
+        if not os.path.exists(full_path):
             raise boss_exc.BossTemplateError("Invalid template config.")
-        else:    
-            
-            return config_reader(open(config_path, 'r'))
+        
+        self.app.log.debug('loading template config %s' % full_path)
+                    
+        import json
+        return json.load(open(full_path, 'r'))
+        
+    def _get_yaml_config(self, path):
+        full_path = fs.abspath(path)
+        if not os.path.exists(full_path):
+            raise boss_exc.BossTemplateError("Invalid template config.")
+        
+        self.app.log.debug('loading template config %s' % full_path)
+                    
+        try:
+            import yaml
+        except ImportError as e:
+            raise boss_exc.BossRuntimeError, \
+                "Unable to import yaml.  Please install pyYaml."
+                
+        return yaml.load(open(full_path, 'r'))
         
     def _populate_vars(self):
         if self.config.has_key('variables'):
-            for question,var in self.config['variables']:
+            for var,question in self.config['variables'].items():
                 if self.app.config.has_key('answers', var.lower()):
                     default = self.app.config.get('answers', var.lower())
                     res = raw_input("%s: [%s] " % (question, default))
@@ -124,7 +139,7 @@ class Template(object):
         for line in f.readlines():
             line_num = line_num + 1
             # only one injection per line is allowed
-            for inj, inj_data in self.config['injections']:
+            for inj,inj_data in self.config['injections'].items():
                 m = re.match('(.*)\@boss.mark\:%s\@(.*)' % inj, line)
                 if m:
                     print("Injecting %s into %s at line #%s" % \
@@ -165,7 +180,7 @@ class Template(object):
     def _walk_path(self, path):
         for items in os.walk(fs.abspath(path)):
             for _file in items[2]:
-                if _file == 'boss.json':
+                if _file == 'boss.yml':
                     continue
                 elif re.match('(.*)\.boss\.bak(.*)', _file):
                     continue    
@@ -183,7 +198,7 @@ class Template(object):
                
         # second handle external files
         if self.config.has_key('external_files'):
-            for _file,remote_uri in self.config['external_files']:
+            for _file, remote_uri in self.config['external_files'].items():
                 dest_path = self._sub(os.path.join(dest_basedir, _file))
                 remote_uri = self._sub(remote_uri)
                 try:
