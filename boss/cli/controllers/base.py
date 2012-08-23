@@ -32,6 +32,8 @@ BANNER = """
                            
 """ % VERSION
 
+ALLOWED_STR_METHODS = ['upper', 'lower', 'title', 'swapcase', 'strip']
+
 class Template(object):
     def __init__(self, app, path):
         self.app = app
@@ -102,6 +104,8 @@ class Template(object):
                 self._vars[var] = res.strip()
                 
     def _sub(self, txt):
+        ### FIX ME: This needs serious refactoring... PLEASE
+        
         # do per item substitution rather than entire txt to avoid variable
         # confusion.  Also allows us to call .capitalize, .lower, etc on the
         # string after substitution.
@@ -140,8 +144,13 @@ class Template(object):
                             )
                         m = re.match(pattern, item)
                         if m:
+                            # string method calls?
                             if len(m.group(3)) > 0:
-                                fixed = str(getattr(value, m.group(3))())
+                                if m.group(3) in ALLOWED_STR_METHODS:
+                                    fixed = str(getattr(value, m.group(3))())
+                                else:
+                                    self.app.log.debug("str method '%s' not allowed." % m.group(3))
+                                    fixed = str(value)
                             else:
                                 fixed = str(value)
 
