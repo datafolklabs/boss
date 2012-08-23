@@ -261,7 +261,7 @@ class SourceManager(object):
      
 class BossBaseController(CementBaseController):
     class Meta:
-        label = 'boss'
+        label = 'base'
         description = 'Boss Templates and Development Utilities'
         arguments = [
             (['-t', '--template'], 
