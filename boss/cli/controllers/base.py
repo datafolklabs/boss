@@ -169,6 +169,17 @@ class Template(object):
             
         return new_txt
             
+    def _sub_or_pass(self, path, data):
+        if self.config.has_key('excludes'):
+            for pattern in self.config['excludes']:
+                if re.match(pattern, path):
+                    self.app.log.debug(
+                        "not doing substitutions for excluded %s" % path
+                        )
+                    # don't do subs
+                    return data
+        return self._sub(data)
+        
     def _inject(self, dest_path):
         new_data = ''
         write_it = False
@@ -198,6 +209,17 @@ class Template(object):
         if write_it:                                
             fs.backup(dest_path, suffix='.boss.bak')
             self._write_file(dest_path, new_data, overwrite=True)
+    
+    def _inject_or_pass(self, path):
+        if self.config.has_key('excludes'):
+            for pattern in self.config['excludes']:
+                if re.match(pattern, path):
+                    self.app.log.debug(
+                        "not doing injections for excluded %s" % path
+                        )
+                    return False
+        return self._inject(path)
+        return True
         
     def _copy_path(self, tmpl_path, dest_path):
         f = open(fs.abspath(tmpl_path), 'r')
@@ -205,7 +227,7 @@ class Template(object):
         f.close()
         
         dest_path = self._sub(fs.abspath(dest_path))
-        dest_data = self._sub(data)
+        dest_data = self._sub_or_pass(tmpl_path, data)
         self._write_file(dest_path, dest_data)
             
     def _write_file(self, dest_path, data, overwrite=False):
@@ -255,7 +277,7 @@ class Template(object):
         # lastly do injections
         if self.config.has_key('injections') and len(self.config['injections']) > 0:
             for dest_path in self._walk_path(dest_basedir):
-                self._inject(dest_path)
+                self._inject_or_pass(dest_path)
                     
 
 class SourceManager(object):
