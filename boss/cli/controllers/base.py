@@ -39,8 +39,9 @@ class Template(object):
         self.config = self._get_config()
         self._word_map = dict()
         self._vars = dict()
-
+        
     def _get_config(self):
+        config = None
         possibles = [
             fs.abspath(os.path.join(self.basedir, 'boss.json')),
             fs.abspath(os.path.join(self.basedir, 'boss.yml')),
@@ -48,13 +49,21 @@ class Template(object):
         for path in possibles:
             if os.path.exists(path):
                 if os.path.basename(path) == 'boss.json':
-                    return self._get_json_config(path)
+                    config = self._get_json_config(path)
+                    break
                 elif os.path.basename(path) == 'boss.yml':
-                    return self._get_yaml_config(path)
+                    config = self._get_yaml_config(path)
+                    break
         
-        # if not, raise
-        raise boss_exc.BossTemplateError("No supported config found.")
+        if not config:
+            raise boss_exc.BossTemplateError("No supported config found.")
                 
+        # fix it up with some defaults
+        if not config.has_key('delimiter'):
+            config['delimiter'] = '@'
+        
+        return config
+        
     def _get_json_config(self, path):
         full_path = fs.abspath(path)
         if not os.path.exists(full_path):
@@ -99,7 +108,9 @@ class Template(object):
         for line in str(txt).split('\n'):
             for item in line.split(' '):
                 # Not a template var? (generic pattern)
-                pattern = "(.*)\@(.*)\@(.*)"
+                pattern = "(.*)\%s(.*)\%s(.*)" % \
+                    (self.config['delimiter'], self.config['delimiter'])
+                    
                 if not re.match(pattern, item):
                     continue
             
@@ -107,12 +118,26 @@ class Template(object):
                     if key in self._word_map:
                         continue
                     
-                    pattern = "(.*)\@(%s)\@(.*)" % key
+                    pattern = "(.*)\%s(%s)\%s(.*)" % (
+                        self.config['delimiter'], 
+                        key, 
+                        self.config['delimiter'],
+                        )
+                         
                     m = re.match(pattern, item)
                     if m:
-                        self._word_map["@%s@" % m.group(2)] = str(value)
+                        map_key = "%s%s%s" % (
+                            self.config['delimiter'], 
+                            m.group(2),
+                            self.config['delimiter'],
+                            )
+                        self._word_map[map_key] = str(value)
                     else:
-                        pattern = "(.*)\@(%s)\.([_a-z0-9]*)\@(.*)" % key
+                        pattern = "(.*)\%s(%s)\.([_a-z0-9]*)\%s(.*)" % (
+                            self.config['delimiter'], 
+                            key,
+                            self.config['delimiter'],
+                            )
                         m = re.match(pattern, item)
                         if m:
                             if len(m.group(3)) > 0:
@@ -120,7 +145,12 @@ class Template(object):
                             else:
                                 fixed = str(value)
 
-                            new_key = "@%s.%s@" % (m.group(2), m.group(3))
+                            new_key = "%s%s.%s%s" % (
+                                self.config['delimiter'], 
+                                m.group(2), 
+                                m.group(3),
+                                self.config['delimiter'],
+                                )
                             self._word_map[new_key] = fixed
         
         # actually replace the text
@@ -140,10 +170,15 @@ class Template(object):
             line_num = line_num + 1
             # only one injection per line is allowed
             for inj,inj_data in self.config['injections'].items():
-                m = re.match('(.*)\@boss.mark\:%s\@(.*)' % inj, line)
+                pattern = '(.*)\%sboss.mark\:%s\%s(.*)' % (
+                    self.config['delimiter'],
+                    inj, 
+                    self.config['delimiter'],
+                    )
+                m = re.match(pattern, line)
                 if m:
                     print("Injecting %s into %s at line #%s" % \
-                        (inj, dest_path, line_num))
+                         (inj, dest_path, line_num))
                     line = line + "%s\n" % self._sub(inj_data)
                     write_it = True
                     break
