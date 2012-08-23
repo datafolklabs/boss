@@ -75,8 +75,8 @@ class Template(object):
         try:
             import yaml
         except ImportError as e:
-            raise boss_exc.BossRuntimeError, \
-                "Unable to import yaml.  Please install pyYaml."
+            raise boss_exc.BossRuntimeError("Unable to import yaml.  " + 
+                                            "Please install pyYaml.")
                 
         return yaml.load(open(full_path, 'r'))
         
