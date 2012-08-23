@@ -1,2 +1,2 @@
-cement>=2.0.1
 pyYaml
+-e git+https://github.com/cement/cement.git#egg=cement
