@@ -32,7 +32,7 @@ BANNER = """
                            
 """ % VERSION
 
-ALLOWED_STR_METHODS = ['upper', 'lower', 'title', 'swapcase', 'strip']
+ALLOWED_STR_METHODS = ['upper', 'lower', 'title', 'swapcase', 'strip', 'capitalize']
 
 class Template(object):
     def __init__(self, app, path):
