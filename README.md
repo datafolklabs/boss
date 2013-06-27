@@ -16,13 +16,13 @@ welcome and appreciated.
 **More Information**
 
  * RTFD: http://boss.readthedocs.org/en/latest/
- * CODE: https://github.com/derks/boss/
+ * CODE: https://github.com/datafolklabs/boss/
  * PYPI: http://pypi.python.org/pypi/boss
- *   CI: http://travis-ci.org/#!/derks/boss
+ *   CI: http://travis-ci.org/#!/datafolklabs/boss
 
 **Official Templates**
 
- * http://github.com/derks/boss-templates
+ * http://github.com/datafolklabs/boss-templates
  
  
 License

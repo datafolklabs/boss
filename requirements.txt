@@ -1,2 +1,2 @@
 pyYaml
--e git+https://github.com/cement/cement.git#egg=cement
+cement
