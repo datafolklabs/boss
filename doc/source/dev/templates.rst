@@ -20,10 +20,10 @@ a readable file.  The following is an example python template:
         `----> setup.cfg
         `----> README
         `----> LICENSE
-        `----> boss.json
+        `----> boss.yml
         
 
-In this example, '@module@' is a variable defined in the 'boss.json' config
+In this example, '@module@' is a variable defined in the 'boss.yml' config
 for this template.  When calling 'boss create -t local:python' Boss will ask
 the user to supply a value for '@module@', and then when files/directories
 are copied that value will be replace at every occurrence of '@module@' both
@@ -33,38 +33,38 @@ in file/directory names as well as file contents.
 Boss Template Configuration Files
 ---------------------------------
 
-Currently Boss only support a 'boss.json' configuration file which is 
-obviously in the JSON format.  The following is an example configuration file:
+Currently Boss only supports a 'boss.json' or boss.yml configuration file 
+which is in the JSON or Yaml format respectively.  The following is an example 
+Yaml configuration file:
 
 .. code-block:: text
 
-    {
-        "variables": [
-            ["Version", "version"],
-            ["Python Module Name", "module"],
-            ["Python Class Prefix", "class_prefix"],
-            ["Project Name", "project"],
-            ["Project Description", "description"],
-            ["Project Creator", "creator"],
-            ["Project Creator Email", "email"],
-            ["License", "license"],
-            ["Project URL", "url"]
-        ],
-        "external_files": [
-            [".gitignore", "https://raw.github.com/github/gitignore/master/Python.gitignore"],
-            ["LICENSE", "https://raw.github.com/derks/oss-license/master/license"]
-        ]
-    }
+    variables:
+        version: Version
+        module: Python Module Name
+        class_prefix: Python Class Prefix
+        project: Project Name
+        description: Project Description
+        creator: Project Creator
+        email: Project Creator Email
+        url: Project URL
+        license: Project License
+
+    external_files:
+        .gitignore: https://raw.github.com/github/gitignore/master/Python.gitignore
+        LICENSE: https://raw.github.com/datafolklabs/license/master/@license@
     
 
 The 'variables' setting is a list of lists.  The first item in a list is the
-question that is asked to the user, and then second is the variable that value
-is stored as.
+variable that is set, and the second is the question as presented to the user
+for input.
 
 The 'external_files' is also a list of lists, and is optional.  These are 
 files that are pulled down externally.  The first item in an external file 
 definition is the destination path where that file should be saved to.  The 
-second is the remote URL to pull the contents from.
+second is the remote URL to pull the contents from.  In the above example
+we use external files to pull down a current .gitignore file from Github, as
+well as a LICENSE file for the given license if it exists.
 
 Working with Variables
 ----------------------
@@ -77,8 +77,19 @@ the value of '@foo@' were 'bar' for example, I could do things like:
     * @foo.capitalize@ => Bar
     * @foo.upper@ => BAR
     * @foo.lower@ => bar
+    * @foo.title@ = Bar
     
 These simple string operations are commonly used throughout templates.  That
-said, don't get carried away ... Boss doesn't intent to be a robust templating
-language, but rather a facility to copy templates for new projects.
+said, don't get carried away ... Boss doesn't intend to be a robust templating
+language, but rather a facility to easily build and copy templates for new 
+projects.
 
+Delimiter
+---------
+
+The default delimiter is '@'.  In some cases, this might not work for your
+template.  You can change this in your boss.yml or boss.json config:
+
+.. code-block:: text
+
+    delimiter: '%'
