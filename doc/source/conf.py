@@ -33,7 +33,7 @@ from boss import VERSION
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.extlinks',]
 
-extlinks = {'issue' : ('https://github.com/derks/boss/issues/%s', 'Issue #')}
+extlinks = {'issue' : ('https://github.com/datafolklabs/boss/issues/%s', 'Issue #')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

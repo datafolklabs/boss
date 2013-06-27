@@ -12,8 +12,8 @@ templating, but far easier to extend.  Though Boss is written in Python, it is
 not limited to any particular language. Boss is very beta... any feedback is 
 welcome and appreciated.
 
-.. image:: https://secure.travis-ci.org/derks/boss.png
-  :target: http://travis-ci.org/#!/derks/boss
+.. image:: https://secure.travis-ci.org/datafolklabs/boss.png
+  :target: http://travis-ci.org/#!/datafolklabs/boss
   
 Features:
 
@@ -24,12 +24,12 @@ Features:
 Other sites that might be helpful.
 
  * RTFD: http://boss.readthedocs.org/en/latest/
- * CODE: https://github.com/derks/boss/
- *   CI: http://travis-ci.org/#!/derks/boss
+ * CODE: https://github.com/datafolklabs/boss/
+ *   CI: http://travis-ci.org/#!/datafolklabs/boss
 
 Official templates are available from:
 
- * http://github.com/derks/boss-templates
+ * http://github.com/datafolklabs/boss-templates
  
  
 Contents:

@@ -15,15 +15,21 @@ virtualenv.  In most cases you will be creating your project with Boss before
 creating a virtualenv anyhow.
 
 
-Installing From Git
--------------------
+Installation
+------------
 
+Stable versions of Boss are available via PyPi:
+
+.. code-block:: text
+
+    $ pip install boss
+    
 To install development versions of Boss you will need to checkout the 'master' 
 branch from GitHub.  
 
 .. code-block:: text
 
-    $ pip install -e git+git://github.com/derks/boss.git#egg=boss
+    $ pip install -e git+git://github.com/datafolklabs/boss.git#egg=boss
     
 
 Working with Sources
@@ -37,7 +43,7 @@ see these repositories via the following command:
     $ boss sources
 
     --        Label: boss
-        Source Path: git@github.com:derks/boss-templates.git
+        Source Path: git@github.com:datafolklabs/boss-templates.git
               Cache: /Users/derks/.boss/cache/tmpJDGhlX
          Local Only: False
      Last Sync Time: never
@@ -56,7 +62,7 @@ remote sources, execute the following:
     remote: Total 102 (delta 45), reused 83 (delta 26)
     Receiving objects: 100% (102/102), 63.38 KiB, done.
     Resolving deltas: 100% (45/45), completed with 18 local objects.
-    From github.com:derks/boss-templates
+    From github.com:datafolklabs/boss-templates
        8626879..8bc867a  master     -> origin/master
 
 You can add your own sources like so:
