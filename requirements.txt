@@ -1,2 +1,2 @@
 pyYaml
-cement
+cement>=2.2.0
