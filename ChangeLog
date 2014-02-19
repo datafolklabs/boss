@@ -1,7 +1,7 @@
 ChangeLog
 ==============================================================================
 
-All bugs/feature details can be found at: 
+All bugs/feature details can be found at:
 
    https://github.com/datafolklabs/boss/issues/XXXXX
 
@@ -15,7 +15,19 @@ is available online at:
 
     <BR><BR>
 
-0.9.12 - Wed Aug 14, 2013 
+0.9.13 - Development
+------------------------------------------------------------------------------
+
+Bugs:
+
+    :issue:`15` - AttributeError: 'module' object has no attribute 'defaults'
+
+Features:
+
+    None
+
+
+0.9.12 - Wed Aug 14, 2013
 ------------------------------------------------------------------------------
 
 Initial Release.  Future releases will mention bugs/features here.
