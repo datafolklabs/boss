@@ -27,12 +27,19 @@ BANNER = """
  |:  1    |:  1   |:  1   |:  1   |
  |::.. .  |::.. . |::.. . |::.. . |
  `-------'`-------`-------`-------'
-               (c) 2012 BJ Dierkes
+      (c) 2014 Data Folk Labs, LLC
                            v%s
 
 """ % VERSION
 
-ALLOWED_STR_METHODS = ['upper', 'lower', 'title', 'swapcase', 'strip', 'capitalize']
+ALLOWED_STR_METHODS = [
+    'upper',
+    'lower',
+    'title',
+    'swapcase',
+    'strip',
+    'capitalize'
+]
 
 class Template(object):
     def __init__(self, app, path):

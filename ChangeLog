@@ -15,12 +15,14 @@ is available online at:
 
     <BR><BR>
 
-0.9.13 - Development
+
+0.9.14 - Feb 19, 2014
 ------------------------------------------------------------------------------
 
 Bugs:
 
     :issue:`15` - AttributeError: 'module' object has no attribute 'defaults'
+    :issue:`16` - Updates for Cement 2.2
 
 Features:
 
