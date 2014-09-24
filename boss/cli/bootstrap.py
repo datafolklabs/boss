@@ -18,16 +18,16 @@ def setup_db(app):
             cache=cache_dir,
             is_local=False,
             last_sync_time='never'
-            ) 
+            )
         app.db['sources'] = sources
 
     if 'templates' not in app.db.keys():
         app.db['templates'] = dict()
-        
+
 def cleanup(app):
     if hasattr(app, 'db'):
         app.db.close()
 
-def load():
+def load(app):
     hook.register('post_setup', setup_db)
     hook.register('pre_close', cleanup)

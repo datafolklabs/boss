@@ -344,8 +344,9 @@ class BossBaseController(CementBaseController):
              dict(help='toggle a local source repository',
                   action='store_true', default=False)),
             (['--version'], dict(action='version', version=BANNER)),
-            (['modifier1'], dict(help='command modifier', nargs='?')),
-            (['modifier2'], dict(help='command modifier', nargs='?')),
+            (['extra'],
+             dict(help='additional positional arguments',
+                  action='store', nargs='*')),
             ]
         config_defaults = dict()
 
@@ -356,7 +357,7 @@ class BossBaseController(CementBaseController):
 
     @expose(help="create project files from a template")
     def create(self):
-        if not self.app.pargs.modifier1:
+        if not len(self.app.pargs.extra) >= 1:
             raise boss_exc.BossArgumentError("Destination path required.")
 
         if not self.app.pargs.template:
@@ -373,7 +374,7 @@ class BossBaseController(CementBaseController):
             template = self.app.pargs.template
 
         src = SourceManager(self.app)
-        src.create_from_template(source, template, self.app.pargs.modifier1)
+        src.create_from_template(source, template, self.app.pargs.extra[0])
 
     @expose(help="list all available templates")
     def templates(self):
@@ -420,12 +421,13 @@ class BossBaseController(CementBaseController):
 
     @expose(help="add a template source repository")
     def add_source(self):
-        if not self.app.pargs.modifier1 or not self.app.pargs.modifier2:
-            raise boss_exc.BossArgumentError("Repository name and path required.")
+        if not len(self.app.pargs.extra) >= 2:
+            raise boss_exc.BossArgumentError("Repository name and path " + \
+                                             "required.")
 
         sources = self.app.db['sources']
-        label = self.app.pargs.modifier1
-        path = self.app.pargs.modifier2
+        label = self.app.pargs.extra[0]
+        path = self.app.pargs.extra[1]
         cache_dir = mkdtemp(dir=self.app.config.get('boss', 'cache_dir'))
 
         if self.app.pargs.local:
@@ -444,23 +446,23 @@ class BossBaseController(CementBaseController):
     def rm_source(self):
         sources = self.app.db['sources']
 
-        if not self.app.pargs.modifier1:
+        if not len(self.app.pargs.extra) >= 1:
             raise boss_exc.BossArgumentError("Repository name required.")
-        elif self.app.pargs.modifier1 not in sources:
+        elif self.app.pargs.extra[0] not in sources:
             raise boss_exc.BossArgumentError("Unknown source repository.")
 
-        cache = sources[self.app.pargs.modifier1]['cache']
+        cache = sources[self.app.pargs.extra[0]]['cache']
         if os.path.exists(cache):
             shutil.rmtree(cache)
 
-        del sources[self.app.pargs.modifier1]
+        del sources[self.app.pargs.extra[0]]
         self.app.db['sources'] = sources
 
     @expose(help="remove .boss.bak* files from path")
     def clean(self):
-        if not self.app.pargs.modifier1:
+        if not len(self.app.pargs.extra) >= 1:
             raise boss_exc.BossArgumentError("Project path required.")
-        for items in os.walk(self.app.pargs.modifier1):
+        for items in os.walk(self.app.pargs.extra[0]):
             for _file in items[2]:
                 path = fs.abspath(os.path.join(items[0], _file))
                 if re.match('(.*)\.boss\.bak(.*)', path):

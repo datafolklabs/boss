@@ -1,18 +1,19 @@
 
 from setuptools import setup, find_packages
 import sys, os
+from cement.utils import version
 from boss import VERSION
 
 LONG = """
 Boss is a development utility that provides quick access to reusable project
-templates for any language.  
+templates for any language.
 """
 
 setup(name='boss',
     version=VERSION,
     description="Baseline Open Source Software Templates",
     long_description=LONG,
-    classifiers=[], 
+    classifiers=[],
     keywords='',
     author='BJ Dierkes',
     author_email='derks@datafolklabs.com',
