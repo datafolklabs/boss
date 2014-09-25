@@ -381,7 +381,7 @@ class BossBaseController(CementBaseController):
         print('')
         sources = self.app.db['sources']
         for label in sources:
-            print("%s Templates" % label.capitalize())
+            print("Source: %s" % label)
             print('-' * 78)
             if label == 'local':
                 local_path = sources[label]
