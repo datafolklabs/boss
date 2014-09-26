@@ -18,8 +18,15 @@ class CLITestCase(test.CementTestCase):
         app.run()
         app.close()
 
-    def test_00_add_local_source(self):
-        app = get_test_app(argv=['add-source', 'test-local', self.tmp_dir,
+    def test_01_add_local_source(self):
+        # get real sources for our local source
+        app = get_test_app(argv=['sources'])
+        app.setup()
+        app.run()
+        local = app.db['sources']['test']['cache']
+        app.close()
+
+        app = get_test_app(argv=['add-source', 'test-local', local,
                                  '--local'])
         app.setup()
         app.run()
@@ -38,6 +45,12 @@ class CLITestCase(test.CementTestCase):
             app.close()
 
     def test_01_sync(self):
+        app = get_test_app(argv=['sync'])
+        app.setup()
+        app.run()
+        app.close()
+
+        # sync again for coverage
         app = get_test_app(argv=['sync'])
         app.setup()
         app.run()
@@ -106,6 +119,33 @@ class CLITestCase(test.CementTestCase):
                     '%s/dest' % self.tmp_dir,
                     '-t',
                     'test:python',
+                    '--defaults',
+                    ],
+                )
+            app.setup()
+            app.config.merge(dict(answers=answers))
+            app.run()
+        finally:
+            app.close()
+
+    def test_create_from_local_source(self):
+        try:
+            answers = dict(
+                version='0.9.1',
+                module='test_python_module',
+                project='Test Pyton Project',
+                description='Project Description',
+                creator='Project Creator',
+                email='nobody@example.com',
+                license='BSD',
+                url='http://project.example.com',
+                )
+            app = get_test_app(
+                argv=[
+                    'create',
+                    '%s/dest' % self.tmp_dir,
+                    '-t',
+                    'test-local:python',
                     '--defaults',
                     ],
                 )

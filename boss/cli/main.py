@@ -44,8 +44,11 @@ class BossApp(foundation.CementApp):
         pth = os.path.join(self.config.get('boss', 'data_dir'), 'boss.db')
         self.config.set('boss', 'db_path', pth)
 
-def main():
-    app = BossApp()
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    app = BossApp(argv=argv)
     try:
         app.setup()
         app.run()
@@ -53,10 +56,10 @@ def main():
         print("BossTemplateError: %s" % e.msg)
     except boss_exc.BossArgumentError as e:
         print("BossArgumentError: %s" % e.msg)
-    except cement_exc.CaughtSignal as e:
-        print(e)
-    except cement_exc.FrameworkError as e:
-        print(e)
+    except cement_exc.CaughtSignal as e:        # pragma: nocover
+        print(e)                                # pragma: nocover
+    except cement_exc.FrameworkError as e:      # pragma: nocover
+        print(e)                                # pragma: nocover
     finally:
         app.close()
 

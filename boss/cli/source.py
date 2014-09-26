@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from cement.utils import fs, shell
 from boss.cli.template import TemplateManager
+from boss.core import exc
 
 class SourceManager(object):
     def __init__(self, app):
@@ -11,13 +12,20 @@ class SourceManager(object):
     def sync(self, source):
         sources = self.app.db['sources']
         src = self.app.db['sources'][source]
+
         if not src['is_local']:
             if not os.path.exists(os.path.join(src['cache'], '.git')):
                 shell.exec_cmd2([ 'git', 'clone',
                                 src['path'], src['cache'] ])
             else:
-                os.chdir(src['cache'])
-                shell.exec_cmd2(['git', 'pull'])
+                orig_dir = fs.abspath(os.curdir)
+                try:
+                    os.chdir(src['cache'])
+                    shell.exec_cmd2(['git', 'pull'])
+                    os.chdir(orig_dir)
+                finally:
+                    os.chdir(orig_dir)
+
         src['last_sync_time'] = datetime.now()
         sources[source] = src
         self.app.db['sources'] = sources
@@ -40,7 +48,12 @@ class SourceManager(object):
         return templates
 
     def create_from_template(self, source, template, dest_dir):
-        src = self.app.db['sources'][source]
+        try:
+            src = self.app.db['sources'][source]
+        except KeyError as e:
+            raise exc.BossTemplateError("Source repo '%s' " % source + \
+                                        "does not exist.")
+
         if src['is_local']:
             basedir = os.path.join(src['path'], template)
         else:
