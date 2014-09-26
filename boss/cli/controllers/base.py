@@ -2,6 +2,7 @@
 import os
 import sys
 import shutil
+import re
 from tempfile import mkdtemp
 from cement.core.controller import CementBaseController, expose
 from cement.utils import fs
@@ -34,6 +35,9 @@ class BossBaseController(CementBaseController):
              dict(help='toggle a local source repository',
                   action='store_true', default=False)),
             (['--version'], dict(action='version', version=BANNER)),
+            (['--defaults'],
+             dict(action='store_true',
+                  help='use default answers without prompting')),
             (['extra'],
              dict(help='additional positional arguments',
                   action='store', nargs='*')),
@@ -42,8 +46,8 @@ class BossBaseController(CementBaseController):
 
     @expose(hide=True)
     def default(self):
-        print("A sub-command is required.  Please see --help.")
-        sys.exit(1)
+        raise boss_exc.BossArgumentError("A sub-command is required.  "
+                                         "Please see --help.")
 
     @expose(help="create project files from a template")
     def create(self):
@@ -70,10 +74,10 @@ class BossBaseController(CementBaseController):
     def templates(self):
         print('')
         sources = self.app.db['sources']
-        for label in sources:
+        for label,data in sources.items():
             print("Source: %s" % label)
             print('-' * 78)
-            if label == 'local':
+            if data['is_local'] is True:
                 local_path = sources[label]
                 remote_path = None
             else:

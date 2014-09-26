@@ -1,6 +1,7 @@
 
 import os
 import sys
+from tempfile import mkdtemp
 from cement.core import foundation
 from cement.core import exc as cement_exc
 from cement.utils import fs, misc
@@ -8,7 +9,7 @@ from boss.cli.controllers.base import BossBaseController
 from boss.core import exc as boss_exc
 
 if sys.version_info[0] >= 3:
-    from imp import reload
+    from imp import reload      # pragma: nocover
 
 defaults = misc.init_defaults('boss', 'answers')
 defaults['boss']['data_dir'] = '~/.boss/'
@@ -59,17 +60,16 @@ def main():
     finally:
         app.close()
 
+test_tmpdir = mkdtemp()
 def get_test_app(**kw):
-    from tempfile import mkdtemp
-
     test_defaults = defaults
-    test_defaults['boss']['data_dir'] = mkdtemp()
-    kw['defaults'] = kw.get('defaults', test_defaults)
+    test_defaults['boss']['data_dir'] = test_tmpdir
+    kw['config_defaults'] = kw.get('config_defaults', test_defaults)
     kw['config_files'] = kw.get('config_files', [])
-    kw['default_sources'] = kw.get('default_sources', None)
+    # kw['default_sources'] = kw.get('default_sources', None)
 
     app = BossApp(**kw)
     return app
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: nocover
