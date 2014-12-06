@@ -3,15 +3,15 @@ import os
 import sys
 import re
 import json
-import ConfigParser
 from cement.utils import fs
 from boss.core import exc as boss_exc
 
 if sys.version_info[0] < 3:
     from urllib2 import urlopen, HTTPError # pragma: no cover
+    from ConfigParser import RawConfigParser  # pragma: no cover
 else:
     from urllib.request import urlopen, HTTPError # pragma: no cover
-
+    from configparser import RawConfigParser  # pragma: no cover
 
 ALLOWED_STR_METHODS = [
     'upper',
@@ -158,7 +158,7 @@ class TemplateManager(object):
                             self._word_map[new_key] = fixed
 
         # actually replace the text
-        new_txt = txt
+        new_txt = str(txt)
         for pattern,replacement in sorted(self._word_map.items()):
             new_txt = re.sub(pattern, replacement, new_txt)
 
