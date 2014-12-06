@@ -60,8 +60,8 @@ def main(argv=None):
         print(e)                                # pragma: nocover
     except cement_exc.FrameworkError as e:      # pragma: nocover
         print(e)                                # pragma: nocover
-    finally:
-        app.close()
+
+    app.close()
 
 test_tmpdir = mkdtemp()
 def get_test_app(**kw):
@@ -69,7 +69,6 @@ def get_test_app(**kw):
     test_defaults['boss']['data_dir'] = test_tmpdir
     kw['config_defaults'] = kw.get('config_defaults', test_defaults)
     kw['config_files'] = kw.get('config_files', [])
-    # kw['default_sources'] = kw.get('default_sources', None)
 
     app = BossApp(**kw)
     return app
