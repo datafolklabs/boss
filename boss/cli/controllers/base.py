@@ -6,10 +6,11 @@ import re
 from tempfile import mkdtemp
 from cement.core.controller import CementBaseController, expose
 from cement.utils import fs
-from boss import VERSION
+from boss.utils.version import get_version
 from boss.core import exc as boss_exc
 from boss.cli.source import SourceManager
 
+VERSION = get_version()
 BANNER = """
 
   _______  _______ _______ _______
@@ -19,8 +20,9 @@ BANNER = """
  |:  1    |:  1   |:  1   |:  1   |
  |::.. .  |::.. . |::.. . |::.. . |
  `-------'`-------`-------`-------'
-      (c) 2014 Data Folk Labs, LLC
-                           v%s
+ Copyright (c) 2015 Data Folk Labs, LLC
+ Version %s
+
 
 """ % VERSION
 

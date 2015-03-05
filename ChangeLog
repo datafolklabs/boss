@@ -24,7 +24,7 @@ Features:
 
 Bugs:
 
-    * None
+    * `issue:21` - Unable to install from PIP 
 
 
 0.9.16 - Sep 25, 2014

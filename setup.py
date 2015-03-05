@@ -1,13 +1,14 @@
 
 from setuptools import setup, find_packages
 import sys, os
-from cement.utils import version
-from boss import VERSION
+from boss.utils.version import get_version
 
 LONG = """
 Boss is a development utility that provides quick access to reusable project
 templates for any language.
 """
+
+VERSION = get_version()
 
 setup(name='boss',
     version=VERSION,
