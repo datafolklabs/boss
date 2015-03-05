@@ -7,8 +7,9 @@ from cement.utils import fs
 from boss.core import exc as boss_exc
 
 if sys.version_info[0] < 3:
-    from urllib2 import urlopen, HTTPError # pragma: no cover
-    from ConfigParser import RawConfigParser  # pragma: no cover
+    from urllib2 import urlopen, HTTPError      # pragma: no cover
+    from ConfigParser import RawConfigParser    # pragma: no cover
+    input = raw_input                           # pragma: no cover
 else:
     from urllib.request import urlopen, HTTPError # pragma: no cover
     from configparser import RawConfigParser  # pragma: no cover
@@ -91,11 +92,11 @@ class TemplateManager(object):
                 else:
                     if var.lower() in self.app.config.keys('answers'):
                         default = self.app.config.get('answers', var.lower())
-                        res = raw_input("%s: [%s] " % (question, default))
+                        res = input("%s: [%s] " % (question, default))
                         if len(res) == 0:
                             res = default
                     else:
-                        res = raw_input("%s: " % question)
+                        res = input("%s: " % question)
                 self._vars[var] = res.strip()
 
     def _sub(self, txt):
