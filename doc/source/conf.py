@@ -24,7 +24,8 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
 from cement.utils import test
 fakeapp = test.TestApp()
 
-from boss import VERSION
+from boss.utils.version import get_version
+VERSION = get_version()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

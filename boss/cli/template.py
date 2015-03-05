@@ -51,8 +51,13 @@ class TemplateManager(object):
             raise boss_exc.BossTemplateError("No supported config found.")
 
         # fix it up with some defaults
-        if 'delimiter' not in config.keys():
-            config['delimiter'] = '@'
+        if 'delimiters' not in config.keys():
+            config['delimiters'] = ('@', '@')
+            config['start_delimiter'] = config['delimiters'][0]
+            config['end_delimiter'] = config['delimiters'][1]
+        else:
+            config['start_delimiter'] = config['delimiters'][0]
+            config['end_delimiter'] = config['delimiters'][1]
 
         return config
 
@@ -108,8 +113,10 @@ class TemplateManager(object):
         for line in str(txt).split('\n'):
             for item in line.split(' '):
                 # Not a template var? (generic pattern)
-                pattern = "(.*)\%s(.*)\%s(.*)" % \
-                    (self.config['delimiter'], self.config['delimiter'])
+                pattern = "(.*)\%s(.*)\%s(.*)" % (
+                            self.config['start_delimiter'],
+                            self.config['end_delimiter'],
+                            )
 
                 if not re.match(pattern, item):
                     continue
@@ -119,24 +126,24 @@ class TemplateManager(object):
                         continue
 
                     pattern = "(.*)\%s(%s)\%s(.*)" % (
-                        self.config['delimiter'],
+                        self.config['start_delimiter'],
                         key,
-                        self.config['delimiter'],
+                        self.config['end_delimiter'],
                         )
 
                     m = re.match(pattern, item)
                     if m:
                         map_key = "%s%s%s" % (
-                            self.config['delimiter'],
+                            self.config['start_delimiter'],
                             m.group(2),
-                            self.config['delimiter'],
+                            self.config['end_delimiter'],
                             )
                         self._word_map[map_key] = str(value)
                     else:
                         pattern = "(.*)\%s(%s)\.([_a-z0-9]*)\%s(.*)" % (
-                            self.config['delimiter'],
+                            self.config['start_delimiter'],
                             key,
-                            self.config['delimiter'],
+                            self.config['end_delimiter'],
                             )
                         m = re.match(pattern, item)
                         if m:
@@ -151,10 +158,10 @@ class TemplateManager(object):
                                 fixed = str(value)
 
                             new_key = "%s%s.%s%s" % (
-                                self.config['delimiter'],
+                                self.config['start_delimiter'],
                                 m.group(2),
                                 m.group(3),
-                                self.config['delimiter'],
+                                self.config['end_delimiter'],
                                 )
                             self._word_map[new_key] = fixed
 
@@ -187,9 +194,9 @@ class TemplateManager(object):
             # only one injection per line is allowed
             for inj,inj_data in self.config['injections'].items():
                 pattern = '(.*)\%sboss.mark\:%s\%s(.*)' % (
-                    self.config['delimiter'],
+                    self.config['start_delimiter'],
                     inj,
-                    self.config['delimiter'],
+                    self.config['end_delimiter'],
                     )
                 m = re.match(pattern, line)
                 if m:

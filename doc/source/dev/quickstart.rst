@@ -7,10 +7,10 @@ few applications from the official repository.
 Development Environment
 -----------------------
 
-It is recommended to work out of a `VirtualENV <http://pypi.python.org/pypi/virtualenv>`_ 
-for development of your application.  That said, you likely don't want to 
-install boss every time you start a new project, therefore in this case you 
-should consider installing boss to your global system outside of your 
+It is recommended to work out of a `VirtualENV <http://pypi.python.org/pypi/virtualenv>`_
+for development of your application.  That said, you likely don't want to
+install boss every time you start a new project, therefore in this case you
+should consider installing boss to your global system outside of your
 virtualenv.  In most cases you will be creating your project with Boss before
 creating a virtualenv anyhow.
 
@@ -23,14 +23,14 @@ Stable versions of Boss are available via PyPi:
 .. code-block:: text
 
     $ pip install boss
-    
-To install development versions of Boss you will need to checkout the 'master' 
-branch from GitHub.  
+
+To install development versions of Boss you will need to checkout the
+``master`` branch from GitHub.
 
 .. code-block:: text
 
     $ pip install -e git+git://github.com/datafolklabs/boss.git#egg=boss
-    
+
 
 Working with Sources
 --------------------
@@ -49,14 +49,14 @@ see these repositories via the following command:
      Last Sync Time: never
 
 
-You will notice in the above example that the 'boss' repository has never been
-synced (which will be the case on a new install).  To sync templates with 
+You will notice in the above example that the ``boss`` repository has never
+been synced (which will be the case on a new install).  To sync templates with
 remote sources, execute the following:
 
 .. code-block:: text
 
     $ boss sync
-    Syncing Boss Templates . . . 
+    Syncing Boss Templates . . .
     remote: Counting objects: 137, done.
     remote: Compressing objects: 100% (73/73), done.
     remote: Total 102 (delta 45), reused 83 (delta 26)
@@ -70,12 +70,12 @@ You can add your own sources like so:
 .. code-block:: text
 
     $ boss add-source my-remote git@github.com:john.doe/boss-templates.git
-    
+
     $ boss add-source local /path/to/my/templates --local
-    
+
 The first example is a remote git repository that holds Boss templates.  The
 second example is a local repository only, and will not attempt to sync with
-a remote upstream repo.  At this time, Boss only support remote Git 
+a remote upstream repo.  At this time, Boss only support remote Git
 repositories.
 
 
@@ -102,20 +102,20 @@ work with:
     python
 
 
-To create a new project, or part of a project, from a template do the 
+To create a new project, or part of a project, from a template do the
 following:
 
 .. code-block:: text
 
     $ boss create ./helloworld -t local:python
-    Version: [0.9.1] 
+    Version: [0.9.1]
     Python Module Name: helloworld
     Python Class Prefix: HelloWorld
     Project Name: Hello World
     Project Description: Hello World does Amazing Things
-    Project Creator: [BJ Dierkes] 
-    Project Creator Email: [derks@bjdierkes.com] 
-    License: [BSD-three-clause] 
+    Project Creator: [BJ Dierkes]
+    Project Creator Email: [derks@bjdierkes.com]
+    License: [BSD-three-clause]
     Project URL: http://helloworld.example.com
     ------------------------------------------------------------------------------
     Writing: /Volumes/Users/derks/helloworld/README
@@ -126,13 +126,13 @@ following:
     Writing: /Volumes/Users/derks/helloworld/tests/test_helloworld.py
     Writing: /Volumes/Users/derks/helloworld/.gitignore
     Writing: /Volumes/Users/derks/helloworld/LICENSE
-    
+
 
 You'll notice a few things in this example:
 
-Some questions were pre-populated by default answers.  These can be set under 
-an '[answers]' config section in '~/.boss/config'.  For example:
- 
+Some questions were pre-populated by default answers.  These can be set under
+an ``[answers]`` config section in ``~/.boss/config``.  For example:
+
 .. code-block:: text
 
     [answers]
@@ -142,9 +142,9 @@ an '[answers]' config section in '~/.boss/config'.  For example:
     license = BSD-three-clause
 
 
-Also, as this is a python project template, the latest 'Python.gitignore' file 
-was pulled down from http://github.com/github/gitignore and copied to 
-.gitignore.
+Also, as this is a python project template, the latest ``Python.gitignore``
+file was pulled down from ``http://github.com/github/gitignore`` and copied to
+``.gitignore``.
 
 And it works:
 
@@ -152,12 +152,12 @@ And it works:
 
     $ python
     >>> import helloworld
-    
+
 With tests:
 
 .. code-block:: text
 
-    $ nosetests 
+    $ nosetests
     test_helloworld (test_helloworld.HelloWorldTestCase) ... ok
 
     ----------------------------------------------------------------------

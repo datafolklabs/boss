@@ -24,8 +24,12 @@ Features:
 
 Bugs:
 
-    * `issue:21` - Unable to install from PIP
-    * `issue:22` - Python 3 Incompatibility (input vs. raw_input)
+    * :issue:`21` - Unable to install from PIP
+    * :issue:`22` - Python 3 Incompatibility (input vs. raw_input)
+
+Refactoring:
+
+    * :issue:`11` - Delimiter should be a two field list/tuple
 
 
 0.9.16 - Sep 25, 2014
