@@ -14,7 +14,7 @@ def setup_db(app):
         sources = app.db['sources']
         sources['boss'] = dict(
             label='boss',
-            path='https://github.com/derks/boss-templates.git',
+            path='https://github.com/datafolklabs/boss-templates.git',
             cache=cache_dir,
             is_local=False,
             last_sync_time='never'
