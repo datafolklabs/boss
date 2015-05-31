@@ -15,9 +15,8 @@ class CLITestCase(test.CementTestCase):
     def test_00_add_source(self):
         app = get_test_app(
             argv=['add-source', 'test', './tests/templates', '--local'])
-        app.setup()
-        app.run()
-        app.close()
+        with app:
+            app.run()
 
     def test_01_add_local_source(self):
         # get real sources for our local source

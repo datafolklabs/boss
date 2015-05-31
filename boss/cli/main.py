@@ -44,24 +44,34 @@ class BossApp(foundation.CementApp):
         pth = os.path.join(self.config.get('boss', 'data_dir'), 'boss.db')
         self.config.set('boss', 'db_path', pth)
 
+
+class BossTestApp(BossApp):
+    def close(self, *args, **kw):
+        try:
+            super(BossTestApp, self).close(*args, **kw)
+        except SystemExit as e:
+            # ignore SystemExit from app.close() for tests
+            pass
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
 
-    app = BossApp(argv=argv)
-    try:
-        app.setup()
-        app.run()
-    except boss_exc.BossTemplateError as e:
-        print("BossTemplateError: %s" % e.msg)
-    except boss_exc.BossArgumentError as e:
-        print("BossArgumentError: %s" % e.msg)
-    except cement_exc.CaughtSignal as e:        # pragma: nocover
-        print(e)                                # pragma: nocover
-    except cement_exc.FrameworkError as e:      # pragma: nocover
-        print(e)                                # pragma: nocover
+    with BossApp(argv=argv) as app:
+        try:
+            app.run()
+        except boss_exc.BossTemplateError as e:
+            print("BossTemplateError: %s" % e.msg)
+            app.exit_code = 1
+        except boss_exc.BossArgumentError as e:
+            print("BossArgumentError: %s" % e.msg)
+            app.exit_code = 1
+        except cement_exc.CaughtSignal as e:        # pragma: nocover
+            print(e)                                # pragma: nocover
+        except cement_exc.FrameworkError as e:      # pragma: nocover
+            print(e)                                # pragma: nocover
+            app.exit_code = 1                       # pragma: nocover
 
-    app.close()
 
 test_tmpdir = mkdtemp()
 def get_test_app(**kw):
@@ -70,7 +80,7 @@ def get_test_app(**kw):
     kw['config_defaults'] = kw.get('config_defaults', test_defaults)
     kw['config_files'] = kw.get('config_files', [])
 
-    app = BossApp(**kw)
+    app = BossTestApp(**kw)
     return app
 
 if __name__ == '__main__':
