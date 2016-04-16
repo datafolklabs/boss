@@ -271,7 +271,7 @@ class TemplateManager(object):
                 dest_path = self._sub(os.path.join(dest_basedir, _file))
                 remote_uri = self._sub(remote_uri)
                 try:
-                    data = self._sub(urlopen(remote_uri).read())
+                    data = self._sub(urlopen(remote_uri).read().decode('utf8'))
                 except HTTPError as e:
                     data = ''
 
