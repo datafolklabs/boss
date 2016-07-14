@@ -2,8 +2,8 @@
 import os
 import shelve
 from tempfile import mkdtemp
-from cement.core import hook, handler
 from cement.utils import fs
+from boss.cli.controllers.base import BossBaseController
 
 def setup_db(app):
     app.extend('db', shelve.open(app.config.get('boss', 'db_path')))
@@ -29,5 +29,6 @@ def cleanup(app):
         app.db.close()
 
 def load(app):
-    hook.register('post_setup', setup_db)
-    hook.register('pre_close', cleanup)
+    app.handler.register(BossBaseController)
+    app.hook.register('post_setup', setup_db)
+    app.hook.register('pre_close', cleanup)

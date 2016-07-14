@@ -3,16 +3,17 @@ import os
 import sys
 import re
 import json
+
 from cement.utils import fs
 from boss.core import exc as boss_exc
 
 if sys.version_info[0] < 3:
-    from urllib2 import urlopen, HTTPError      # pragma: no cover
-    from ConfigParser import RawConfigParser    # pragma: no cover
-    input = raw_input                           # pragma: no cover
+    from urllib2 import urlopen, HTTPError          # pragma: no cover
+    import ConfigParser                             # pragma: no cover
+    input = raw_input                               # pragma: no cover
 else:
-    from urllib.request import urlopen, HTTPError # pragma: no cover
-    from configparser import RawConfigParser  # pragma: no cover
+    from urllib.request import urlopen, HTTPError   # pragma: no cover
+    import configparser as ConfigParser             # pragma: no cover
 
 ALLOWED_STR_METHODS = [
     'upper',

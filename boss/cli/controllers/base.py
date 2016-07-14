@@ -4,7 +4,7 @@ import sys
 import shutil
 import re
 from tempfile import mkdtemp
-from cement.core.controller import CementBaseController, expose
+from cement.ext.ext_argparse import ArgparseController, expose
 from cement.utils import fs
 from boss.utils.version import get_version
 from boss.core import exc as boss_exc
@@ -26,34 +26,44 @@ BANNER = """
 
 """ % VERSION
 
-class BossBaseController(CementBaseController):
+class BossBaseController(ArgparseController):
     class Meta:
         label = 'base'
         description = 'Boss Templates and Development Utilities'
         arguments = [
-            (['-t', '--template'],
-             dict(help="a template label", dest='template')),
-            (['--local'],
-             dict(help='toggle a local source repository',
-                  action='store_true', default=False)),
+            # (['-t', '--template'],
+            #  dict(help="a template label", dest='template')),
+            # (['--local'],
+            #  dict(help='toggle a local source repository',
+            #       action='store_true', default=False)),
             (['--version'], dict(action='version', version=BANNER)),
-            (['--defaults'],
-             dict(action='store_true',
-                  help='use default answers without prompting')),
-            (['extra'],
-             dict(help='additional positional arguments',
-                  action='store', nargs='*')),
+            # (['--defaults'],
+            #  dict(action='store_true',
+            #       help='use default answers without prompting')),
+            # (['extra'],
+            #  dict(help='additional positional arguments',
+            #       action='store', nargs='*')),
             ]
-        config_defaults = dict()
 
     @expose(hide=True)
     def default(self):
         raise boss_exc.BossArgumentError("A sub-command is required.  "
                                          "Please see --help.")
 
-    @expose(help="create project files from a template")
+    @expose(
+        help="create project files from a template",
+        arguments=[
+            (['-t', '--template'],
+             dict(help="a template label", dest='template')),
+            (['--defaults'],
+             dict(action='store_true',
+                  help='use default answers without prompting')),
+            (['project_path'],
+             dict(help='project destination path', action='store')),
+        ]
+    )
     def create(self):
-        if not len(self.app.pargs.extra) >= 1:
+        if not len(self.app.pargs.project_path) >= 1:
             raise boss_exc.BossArgumentError("Destination path required.")
 
         if not self.app.pargs.template:
@@ -70,7 +80,8 @@ class BossBaseController(CementBaseController):
             template = self.app.pargs.template
 
         src = SourceManager(self.app)
-        src.create_from_template(source, template, self.app.pargs.extra[0])
+        src.create_from_template(source, template, 
+                                 self.app.pargs.project_path)
 
     @expose(help="list all available templates")
     def templates(self):
@@ -115,15 +126,22 @@ class BossBaseController(CementBaseController):
             print(" Last Sync Time: %s" % src['last_sync_time'])
         print('')
 
-    @expose(help="add a template source repository")
+    @expose(
+        help="add a template source repository",
+        arguments=[
+            (['--local'],
+             dict(help='toggle a local source repository',
+                  action='store_true', default=False)),
+            (['repo_label'],
+             dict(help='repository label identifier', action='store')),
+            (['repo_path'],
+             dict(help='repository path', action='store')),
+        ]
+    )
     def add_source(self):
-        if not len(self.app.pargs.extra) >= 2:
-            raise boss_exc.BossArgumentError("Repository name and path " + \
-                                             "required.")
-
         sources = self.app.db['sources']
-        label = self.app.pargs.extra[0]
-        path = self.app.pargs.extra[1]
+        label = self.app.pargs.repo_label
+        path = self.app.pargs.repo_path
         cache_dir = mkdtemp(dir=self.app.config.get('boss', 'cache_dir'))
 
         if self.app.pargs.local:
@@ -138,27 +156,39 @@ class BossBaseController(CementBaseController):
             )
         self.app.db['sources'] = sources
 
-    @expose(help="remove a source repository")
+    @expose(
+        help="remove a source repository",
+        arguments=[
+            (['repo_label'],
+             dict(help='repository label identifier', action='store')),
+        ]
+    )
     def rm_source(self):
         sources = self.app.db['sources']
 
-        if not len(self.app.pargs.extra) >= 1:
-            raise boss_exc.BossArgumentError("Repository name required.")
-        elif self.app.pargs.extra[0] not in sources:
+        # if not len(self.app.pargs.extra) >= 1:
+        #     raise boss_exc.BossArgumentError("Repository name required.")
+        if self.app.pargs.repo_label not in sources:
             raise boss_exc.BossArgumentError("Unknown source repository.")
 
-        cache = sources[self.app.pargs.extra[0]]['cache']
+        cache = sources[self.app.pargs.repo_label]['cache']
         if os.path.exists(cache):
             shutil.rmtree(cache)
 
-        del sources[self.app.pargs.extra[0]]
+        del sources[self.app.pargs.repo_label]
         self.app.db['sources'] = sources
 
-    @expose(help="remove .boss.bak* files from path")
+    @expose(
+        help="remove .boss.bak* files from path",
+        arguments=[
+            (['project_path'],
+             dict(help='project destination path', action='store')),
+        ]
+    )
     def clean(self):
-        if not len(self.app.pargs.extra) >= 1:
-            raise boss_exc.BossArgumentError("Project path required.")
-        for items in os.walk(self.app.pargs.extra[0]):
+        # if not len(self.app.pargs.extra) >= 1:
+        #     raise boss_exc.BossArgumentError("Project path required.")
+        for items in os.walk(self.app.pargs.project_path):
             for _file in items[2]:
                 path = fs.abspath(os.path.join(items[0], _file))
                 if re.match('(.*)\.boss\.bak(.*)', path):

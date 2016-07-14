@@ -2,29 +2,19 @@
 import os
 import sys
 from tempfile import mkdtemp
-from cement.core import foundation
+from cement.core.foundation import CementApp
 from cement.core import exc as cement_exc
 from cement.utils import fs, misc
-from boss.cli.controllers.base import BossBaseController
 from boss.core import exc as boss_exc
-
-if sys.version_info[0] >= 3:
-    from imp import reload      # pragma: nocover
 
 defaults = misc.init_defaults('boss', 'answers')
 defaults['boss']['data_dir'] = '~/.boss/'
 
-class BossApp(foundation.CementApp):
+class BossApp(CementApp):
     class Meta:
         label = 'boss'
         bootstrap = 'boss.cli.bootstrap'
-        base_controller = BossBaseController
         config_defaults = defaults
-        config_files = [
-            '/etc/boss/boss.conf',
-            '~/.boss.conf',
-            '~/.boss/config',
-            ]
 
     def validate_config(self):
         # fix up paths
