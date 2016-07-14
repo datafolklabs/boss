@@ -7,14 +7,14 @@ from cement.core import exc as cement_exc
 from cement.utils import fs, misc
 from boss.core import exc as boss_exc
 
-defaults = misc.init_defaults('boss', 'answers')
-defaults['boss']['data_dir'] = '~/.boss/'
+CONFIG_DEFAULTS = misc.init_defaults('boss', 'answers')
+CONFIG_DEFAULTS['boss']['data_dir'] = '~/.boss/'
 
 class BossApp(CementApp):
     class Meta:
         label = 'boss'
         bootstrap = 'boss.cli.bootstrap'
-        config_defaults = defaults
+        config_defaults = CONFIG_DEFAULTS
 
     def validate_config(self):
         # fix up paths
@@ -35,13 +35,13 @@ class BossApp(CementApp):
         self.config.set('boss', 'db_path', pth)
 
 
-class BossTestApp(BossApp):
-    def close(self, *args, **kw):
-        try:
-            super(BossTestApp, self).close(*args, **kw)
-        except SystemExit as e:
-            # ignore SystemExit from app.close() for tests
-            pass
+# class BossTestApp(BossApp):
+#     def close(self, *args, **kw):
+#         try:
+#             super(BossTestApp, self).close(*args, **kw)
+#         except SystemExit as e:
+#             # ignore SystemExit from app.close() for tests
+#             pass
 
 def main(argv=None):
     if argv is None:
@@ -63,15 +63,15 @@ def main(argv=None):
             app.exit_code = 1                       # pragma: nocover
 
 
-test_tmpdir = mkdtemp()
-def get_test_app(**kw):
-    test_defaults = defaults
-    test_defaults['boss']['data_dir'] = test_tmpdir
-    kw['config_defaults'] = kw.get('config_defaults', test_defaults)
-    kw['config_files'] = kw.get('config_files', [])
+# test_tmpdir = mkdtemp()
+# def get_test_app(**kw):
+#     test_defaults = defaults
+#     test_defaults['boss']['data_dir'] = test_tmpdir
+#     kw['config_defaults'] = kw.get('config_defaults', test_defaults)
+#     kw['config_files'] = kw.get('config_files', [])
 
-    app = BossTestApp(**kw)
-    return app
+#     app = BossTestApp(**kw)
+#     return app
 
 if __name__ == '__main__':
     main()  # pragma: nocover

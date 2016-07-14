@@ -8,7 +8,6 @@ from cement.ext.ext_argparse import ArgparseController, expose
 from cement.utils import fs
 from boss.utils.version import get_version
 from boss.core import exc as boss_exc
-from boss.cli.source import SourceManager
 
 VERSION = get_version()
 BANNER = """
@@ -50,6 +49,7 @@ class BossBaseController(ArgparseController):
         raise boss_exc.BossArgumentError("A sub-command is required.  "
                                          "Please see --help.")
 
+    # ------------------------------------------------------------------------
     @expose(
         help="create project files from a template",
         arguments=[
@@ -79,10 +79,11 @@ class BossBaseController(ArgparseController):
             source = 'boss'
             template = self.app.pargs.template
 
-        src = SourceManager(self.app)
-        src.create_from_template(source, template, 
-                                 self.app.pargs.project_path)
+        #src = SourceManager(self.app)
+        self.app.sources.create_from_template(source, template, 
+                                              self.app.pargs.project_path)
 
+    # ------------------------------------------------------------------------
     @expose(help="list all available templates")
     def templates(self):
         print('')
@@ -99,21 +100,23 @@ class BossBaseController(ArgparseController):
                             )
                 remote_path = sources[label]
 
-            src = SourceManager(self.app)
-            for tmpl in src.get_templates(label):
+            #src = SourceManager(self.app)
+            for tmpl in self.app.sources.get_templates(label):
                 print(tmpl)
 
             print('')
 
+    # ------------------------------------------------------------------------
     @expose(help="sync a source repository")
     def sync(self):
         _sources = self.app.db['sources']
         for label in self.app.db['sources']:
             print("Syncing %s Templates . . . " % label.capitalize())
-            src = SourceManager(self.app)
-            src.sync(label)
+            #src = SourceManager(self.app)
+            self.app.sources.sync(label)
             print('')
 
+    # ------------------------------------------------------------------------
     @expose(help="list template source repositories")
     def sources(self):
         for key in self.app.db['sources']:
@@ -126,12 +129,13 @@ class BossBaseController(ArgparseController):
             print(" Last Sync Time: %s" % src['last_sync_time'])
         print('')
 
+    # ------------------------------------------------------------------------
     @expose(
         help="add a template source repository",
         arguments=[
             (['--local'],
              dict(help='toggle a local source repository',
-                  action='store_true', default=False)),
+                  action='store_true', default=False, dest='local')),
             (['repo_label'],
              dict(help='repository label identifier', action='store')),
             (['repo_path'],
@@ -139,23 +143,11 @@ class BossBaseController(ArgparseController):
         ]
     )
     def add_source(self):
-        sources = self.app.db['sources']
         label = self.app.pargs.repo_label
         path = self.app.pargs.repo_path
-        cache_dir = mkdtemp(dir=self.app.config.get('boss', 'cache_dir'))
-
-        if self.app.pargs.local:
-            path = fs.abspath(path)
-
-        sources[label] = dict(
-            label=label,
-            path=path,
-            cache=cache_dir,
-            is_local=self.app.pargs.local,
-            last_sync_time='never'
-            )
-        self.app.db['sources'] = sources
-
+        self.app.sources.add(label, path, local=self.app.pargs.local)
+    
+    # ------------------------------------------------------------------------
     @expose(
         help="remove a source repository",
         arguments=[
@@ -164,20 +156,9 @@ class BossBaseController(ArgparseController):
         ]
     )
     def rm_source(self):
-        sources = self.app.db['sources']
+        self.app.sources.remove(self.app.pargs.repo_label)
 
-        # if not len(self.app.pargs.extra) >= 1:
-        #     raise boss_exc.BossArgumentError("Repository name required.")
-        if self.app.pargs.repo_label not in sources:
-            raise boss_exc.BossArgumentError("Unknown source repository.")
-
-        cache = sources[self.app.pargs.repo_label]['cache']
-        if os.path.exists(cache):
-            shutil.rmtree(cache)
-
-        del sources[self.app.pargs.repo_label]
-        self.app.db['sources'] = sources
-
+    # ------------------------------------------------------------------------
     @expose(
         help="remove .boss.bak* files from path",
         arguments=[
@@ -186,8 +167,6 @@ class BossBaseController(ArgparseController):
         ]
     )
     def clean(self):
-        # if not len(self.app.pargs.extra) >= 1:
-        #     raise boss_exc.BossArgumentError("Project path required.")
         for items in os.walk(self.app.pargs.project_path):
             for _file in items[2]:
                 path = fs.abspath(os.path.join(items[0], _file))
