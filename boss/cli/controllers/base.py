@@ -63,12 +63,6 @@ class BossBaseController(ArgparseController):
         ]
     )
     def create(self):
-        if not len(self.app.pargs.project_path) >= 1:
-            raise boss_exc.BossArgumentError("Destination path required.")
-
-        if not self.app.pargs.template:
-            raise boss_exc.BossArgumentError("Template label required.")
-
         sources = self.app.db.get('sources')
 
         try:
@@ -79,7 +73,6 @@ class BossBaseController(ArgparseController):
             source = 'boss'
             template = self.app.pargs.template
 
-        #src = SourceManager(self.app)
         self.app.sources.create_from_template(source, template, 
                                               self.app.pargs.project_path)
 

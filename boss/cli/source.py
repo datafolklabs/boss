@@ -81,8 +81,8 @@ class SourceManager(object):
         try:
             src = self.app.db['sources'][source]
         except KeyError as e:
-            raise exc.BossTemplateError("Source repo '%s' " % source + \
-                                        "does not exist.")
+            raise exc.BossSourceError("Source repo '%s' " % source + \
+                                      "does not exist.")
 
         if src['is_local']:
             basedir = os.path.join(src['path'], template)

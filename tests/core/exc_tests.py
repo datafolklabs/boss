@@ -1,8 +1,10 @@
 """Tests for boss.core.exc."""
 
-from cement.utils import test
 from boss.core import exc
+from boss.utils import test
 
+
+@test.attr('core')
 class ExceptionTestCase(test.CementTestCase):
     @test.raises(exc.BossError)    
     def test_boss_error(self):

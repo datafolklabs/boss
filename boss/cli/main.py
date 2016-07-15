@@ -35,14 +35,6 @@ class BossApp(CementApp):
         self.config.set('boss', 'db_path', pth)
 
 
-# class BossTestApp(BossApp):
-#     def close(self, *args, **kw):
-#         try:
-#             super(BossTestApp, self).close(*args, **kw)
-#         except SystemExit as e:
-#             # ignore SystemExit from app.close() for tests
-#             pass
-
 def main(argv=None):
     if argv is None:
         argv = sys.argv[1:]
@@ -62,16 +54,6 @@ def main(argv=None):
             print(e)                                # pragma: nocover
             app.exit_code = 1                       # pragma: nocover
 
-
-# test_tmpdir = mkdtemp()
-# def get_test_app(**kw):
-#     test_defaults = defaults
-#     test_defaults['boss']['data_dir'] = test_tmpdir
-#     kw['config_defaults'] = kw.get('config_defaults', test_defaults)
-#     kw['config_files'] = kw.get('config_files', [])
-
-#     app = BossTestApp(**kw)
-#     return app
 
 if __name__ == '__main__':
     main()  # pragma: nocover

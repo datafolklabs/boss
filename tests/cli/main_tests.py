@@ -1,31 +1,47 @@
 
-from cement.utils import test
+import os
+import shutil
 from boss.core import exc
 from boss.cli.main import main
+from boss.utils import test
 
-class CLIMainTestCase(test.CementTestCase):
+@test.attr('main')
+class CLIMainTestCase(test.BossTestCase):
     @test.raises(SystemExit)
+    def test_main_no_args_using_sysv(self):
+        main()
+
     def test_main_no_args(self):
-        try:
-            main()
-        except SystemExit as e:
-            self.eq(e.code, 1)
-            raise
+        main([])
 
-    @test.raises(SystemExit)
+    @test.raises(exc.BossSourceError)
     def test_main_template_error(self):
+        # setup the default app first to add the sources
+        with self.app as app:
+            app.sources.add(self.rando, self.tmp_dir, local=True)
+
         try:
             main(['create', '-t', 'bogus:bogus_template', self.tmp_dir])
-        except SystemExit as e:
-            self.eq(e.code, 1)
+        except exc.BossSourceError as e:
+            self.eq(e.msg, "Source repo 'bogus' does not exist.")
             raise
 
     @test.raises(SystemExit)
     def test_main_argument_error(self):
-        try:
-            main(['create'])
-        except SystemExit as e:
-            self.eq(e.code, 1)
-            raise
+        main(['create'])
 
+    @test.raises(SystemExit)
+    def test_main_argument_error(self):
+        main(['create'])
 
+    def test_missing_data_dir(self):
+        shutil.rmtree(self.tmp_dir)
+        main(['templates'])
+        self.ok(os.path.exists(self.tmp_dir))
+
+    def test_template_error(self):
+        # setup the default app first to add the sources
+        with self.app as app:
+            app.sources.add(self.rando, self.tmp_dir, local=True)
+
+        main(['create', '-t', '%s:bogus_template' % self.rando, self.tmp_dir])
