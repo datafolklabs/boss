@@ -27,6 +27,5 @@ pip-log.txt
 .mr.developer.cfg
 templates
 coverage_report
-test.py
 test.conf
 tmp/
