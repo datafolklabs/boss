@@ -16,7 +16,7 @@ Boss is very beta... any feedback is welcome and appreciated.
 
 **More Information**
 
- * RTFD: http://boss.readthedocs.org/en/latest/
+ * RTFD: https://boss.readthedocs.io/en/latest/
  * CODE: https://github.com/datafolklabs/boss/
  * PYPI: http://pypi.python.org/pypi/boss
  *   CI: http://travis-ci.org/#!/datafolklabs/boss

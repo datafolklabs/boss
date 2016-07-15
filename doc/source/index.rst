@@ -23,7 +23,7 @@ Features:
 
 Other sites that might be helpful.
 
-  * RTFD: http://boss.readthedocs.org/en/latest/
+  * RTFD: https://boss.readthedocs.io/en/latest/
   * CODE: https://github.com/datafolklabs/boss/
   * PYPI: http://pypi.python.org/pypi/boss
   *   CI: http://travis-ci.org/#!/datafolklabs/boss
