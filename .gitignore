@@ -20,12 +20,16 @@ pip-log.txt
 .coverage
 .tox
 
-#Translations
+# Translations
 *.mo
 
-#Mr Developer
+# Mr Developer
 .mr.developer.cfg
 templates
 coverage_report
 test.conf
 tmp/
+
+# Vagrant
+.vagrant/
+
